@@ -431,13 +431,13 @@ void NuWro::makeevent(event* e, params &p)
 				hypevent (p, *e, *_nucleus);
 			}
 			break;		
-		case 12:
-			e->flag.lep=true; //->flag.cc=true;
-			if (p.dyn_lep) // Neutrino-lepton
-			{
-				lepevent (p, *e); //, true);
-			}
-			break;
+		// case 12:
+		// 	e->flag.lep=true; //->flag.cc=true;
+		// 	if (p.dyn_lep) // Neutrino-lepton
+		// 	{
+		// 		lepevent (p, *e); //, true);
+		// 	}
+		// 	break;
 	}
 	else if(e->in[0].pdg==11) // electron scattering
 	{

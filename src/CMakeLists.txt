@@ -17,7 +17,7 @@ set(COMMON_SOURCES
   cohevent2.cc cohdynamics2.cc  qelevent1.cc mecdynamics.cc mecevent.cc mecevent_tem.cc mecevent_Nieves.cc mecevent_SuSA.cc particle.cc
   mecevent_common.cc mecdynamics2.cc mecevent2.cc qel_sigma.cc kinsolver.cc input_data.cc data_container.cc kinematics.cc pdg.cc target_mixer.cc
   nucleus.cc sfevent.cc ff.cc rpa_2013.cc nucleus_data.cc isotopes.cc elements.cc beam.cc nd280stats.cc beamHist.cc coh.cc fsi.cc pitab.cc scatter.cc
-  kaskada7.cc hyperon_cascade.cc hypevent.cc hyperon_interaction.cc Interaction.cc e_el_event.cc e_el_sigma.cc e_spp_event.cc  espp/crossection.cc espp/DM.cc rew/PythiaQuiet.f
+  kaskada7.cc hyperon_cascade.cc hypevent.cc hyperon_interaction.cc Interaction.cc rew/PythiaQuiet.f
   pauli.cc generatormt.cc rew/rewparams.cc
 )
 
@@ -31,9 +31,9 @@ foreach(FILE ${DIS})
   set(DIS_SOURCES ${DIS_SOURCES} dis/${FILE})
 endforeach()
 
-set(ESPP_SURCES e_spp_event.cc)
+# set(ESPP_SURCES e_spp_event.cc)
 
-AUX_SOURCE_DIRECTORY(espp ESPP_SOURCES)
+# AUX_SOURCE_DIRECTORY(espp ESPP_SOURCES)
 
 AUX_SOURCE_DIRECTORY(sf SF_SOURCES)
 
@@ -52,6 +52,10 @@ add_custom_command(
 add_library(event SHARED ${EVENT_SOURCES})
 add_dependencies(event params_header)
 
+add_library(libnuwro SHARED libnuwro.cc ${EVENT_SOURCES})
+add_dependencies(libnuwro params_header)
+target_link_libraries(libnuwro ${EXTERNAL_LIBS} event1 common1 dis1 sf1)
+
 add_library(event1 STATIC ${EVENT_SOURCES})
 add_dependencies(event1 params_header)
 
@@ -67,8 +71,8 @@ add_dependencies(sf1 params_header)
 add_library(dis1 STATIC ${DIS_SOURCES})
 add_dependencies(dis1 params_header)
 
-add_library(espp1 STATIC ${ESPP_SOURCES})
-add_dependencies(espp1 params_header)
+# add_library(espp1 STATIC ${ESPP_SOURCES})
+# add_dependencies(espp1 params_header)
 
 add_library(rew1 STATIC ${REW_SOURCES})
 add_dependencies(rew1 params_header)
@@ -77,7 +81,11 @@ target_link_libraries(rew1 ${EXTERNAL_LIBS} common1 dis1)
 
 
 add_executable(nuwro main.cc nuwro.cc)
-target_link_libraries(nuwro ${EXTERNAL_LIBS} event1 common1 dis1 espp1 sf1)
+target_link_libraries(nuwro ${EXTERNAL_LIBS} event1 common1 dis1 sf1)
+
+add_executable(nuwro_metropolis nuwro_metropolis.cc nuwro_metropolis_main.cc)
+target_link_libraries(nuwro_metropolis ${EXTERNAL_LIBS} event1 common1 dis1 sf1)
+
 
 add_executable(kaskada scatter.cc kaskada7.cc Interaction.cc hyperon_interaction.cc hyperon_cascade.cc input_data.cc data_container.cc 
                 nucleus.cc kaskada.cc rew/rewparams.cc ff.cc fsi.cc pitab.cc nucleus_data.cc isotopes.cc elements.cc) 
@@ -140,7 +148,7 @@ target_link_libraries(whist ${EXTERNAL_LIBS} event1)
 
 
 install(TARGETS nuwro kaskada myroot nuwro2neut nuwro2nuance nuwro2rootracker  
-        dumpParams glue reweight_to reweight_along whist
+        dumpParams glue reweight_to reweight_along whist nuwro_metropolis
         # niwg fsi ganalysis mb_nce_run ladek_topologies 
         # test_nucleus test_beam test_beam_rf test_makehist
         DESTINATION bin)

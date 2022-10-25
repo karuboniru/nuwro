@@ -15,10 +15,10 @@ DEBUG         = 1
 #DEBUGON = -g
 ifeq ($(OS),Darwin)
   # Flags for OSX
-  CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -O2 $(DEBUGON) -I src -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wreorder -Wmissing-braces $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
+  CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -flto -O2 $(DEBUGON) -I src -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wreorder -Wmissing-braces $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
 else
   # Flags for others
- CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -O2 $(DEBUGON) -I src -Wl,--no-as-needed -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wreorder -Wmissing-braces $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
+ CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -flto -O2 $(DEBUGON) -I src -Wl,--no-as-needed -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wreorder -Wmissing-braces $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
 # CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` --std=c++17 -fPIC -O2 $(DEBUGON) -I src -Wl,--no-as-needed -Wall -Wno-deprecated-register -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS)
  
 endif
@@ -36,7 +36,7 @@ FC            = gfortran
 
 TRGTS = $(addprefix $(BIN)/,\
         nuwro kaskada myroot glue event1.so nuwro2neut nuwro2nuance nuwro2rootracker\
-        dumpParams reweight_to reweight_along whist ) 
+        dumpParams reweight_to reweight_along whist nuwro_metropolis ) 
 		# test_beam_rf test_makehist test_nucleus test_beam 
         # fsi niwg ladek_topologies test mb_nce_run ganalysis 
         # )
@@ -70,6 +70,14 @@ $(BIN)/nuwro:   $(addprefix src/,\
         qel_sigma.o kinsolver.o kinematics.o pdg.o target_mixer.o nucleus.o sfevent.o ff.o dirs.o rpa_2013.o\
         nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o rew/rewparams.o\
         nuwro.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  main.o) \
+        $(EVENT_OBJS) $(SF_OBJS) $(DIS_OBJS) $(MEC_OBJS)
+		$(LINK.cc) $^ -o $@
+
+$(BIN)/nuwro_metropolis:   $(addprefix src/,\
+        pauli.o cohevent2.o cohdynamics2.o qelevent1.o hypevent.o hyperon_interaction.o hyperon_cascade.o lepevent.o nu_e_el_sigma.o\
+        qel_sigma.o kinsolver.o kinematics.o pdg.o target_mixer.o nucleus.o sfevent.o ff.o dirs.o rpa_2013.o\
+        nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o rew/rewparams.o\
+        nuwro_metropolis.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  nuwro_metropolis_main.o) \
         $(EVENT_OBJS) $(SF_OBJS) $(DIS_OBJS) $(MEC_OBJS)
 		$(LINK.cc) $^ -o $@
 

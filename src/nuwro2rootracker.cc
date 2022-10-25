@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <vector>
 #include <sys/stat.h> 
+#include "TParameter.h"
 #include "event1.h"
 #include "TROOT.h"
 #include "TTree.h"
@@ -148,6 +149,13 @@ int main (int argc, char *argv[]){
     event *e = new event;
     TFile *fin = new TFile(argv[optind]);//input file
     TTree *tt1 = (TTree*)fin->Get("treeout");
+    auto list = tt1->GetUserInfo();
+    double xsec{};
+    for (auto && obj : *list){
+      if(TString{"xsec"} == obj->GetName()){
+        xsec = (dynamic_cast<TParameter<double>*>(obj))->GetVal();
+      }
+    }
     tt1->SetBranchAddress ("e", &e);
     int n = tt1->GetEntries();
     if (onefile) ncopy=n;  //by default one big rootracker with n events in it.
@@ -316,7 +324,11 @@ int main (int argc, char *argv[]){
 	  fEvtXSec=e->weight*coef; //unimportant for regular events
 	  fEvtDXSec=fEmpty;
 	  fEvtWght=e->weight*1e38; //unimportant for regular events
-	  fEvtProb=fEmpty;
+    if (xsec) {
+      fEvtWght = xsec * 1e38;
+      fEvtXSec = xsec * coef;
+    }
+    fEvtProb=fEmpty;
 	  fEvtVtx[0]=e->r.x/1000;
 	  fEvtVtx[1]=e->r.y/1000;
 	  fEvtVtx[2]=e->r.z/1000;

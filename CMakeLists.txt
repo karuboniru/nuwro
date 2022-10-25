@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.9 FATAL_ERROR)
 
 project (NUWRO)
 
@@ -9,7 +9,7 @@ set (VERBOSE TRUE)
 set (CMAKE_SKIP_BUILD_RPATH TRUE)
 
 IF( NOT CMAKE_BUILD_TYPE )
-   SET( CMAKE_BUILD_TYPE Release)
+   SET( CMAKE_BUILD_TYPE RelWithDebInfo)
 ENDIF()
 
 execute_process(COMMAND git describe --tags 
@@ -71,7 +71,7 @@ message(STATUS "System:" ${CMAKE_SYSTEM_NAME})
 set(CXX_WARNINGS "-Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function    -Wno-unknown-warning-option -Wno-unused-but-set-variable -Wmissing-braces ")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} ${NUWRO_CFLAGS} -std=c++0x -fPIC -O2 -Wl,--no-as-needed -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
+  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} ${NUWRO_CFLAGS} -std=c++11 -fPIC -flto -O2 -Wl,--no-as-needed -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
