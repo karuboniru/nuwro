@@ -35,7 +35,7 @@ execute_process (COMMAND root-config --ldflags  OUTPUT_VARIABLE ROOT_LD_FLAGS  O
 
 
 # remove libaries and directories  from ROOT_LIBS0 to obtain ROOT_LD_FLAGS
-string(REGEX REPLACE " -(l|L)[^ ]* "  " "   CMAKE_LINK_FLAGS " ${ROOT_LIBS0} ") 
+string(REGEX REPLACE " -(l|L)[^ ]* "  " "   CMAKE_LINK_FLAGS " ${ROOT_LIBS0}") 
 
 # obtain root lib directory
 string(REGEX MATCH "-L([^ ]*)" DUMMY ${ROOT_LIBS0} )
@@ -71,12 +71,14 @@ message(STATUS "System:" ${CMAKE_SYSTEM_NAME})
 set(CXX_WARNINGS "-Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function    -Wno-unknown-warning-option -Wno-unused-but-set-variable -Wmissing-braces ")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} ${NUWRO_CFLAGS} -std=c++11 -fPIC -flto -O2 -Wl,--no-as-needed -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
+  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} ${NUWRO_CFLAGS} -std=c++17 -fPIC -flto -g -O2 -Wl,--no-as-needed -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} -Wmissing-braces ${NUWRO_CFLAGS}  -fPIC -O2  -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
 endif()
+
+set(CMAKE_Fortran_FLAGS "-fPIC -flto -O2 ${CMAKE_Fortran_FLAGS}")
 
 message (STATUS "C++ Compiler      : " ${CXX_COMPILER_NAME})
 message (STATUS "    Release flags : " ${CMAKE_CXX_FLAGS_RELEASE})

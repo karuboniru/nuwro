@@ -22,7 +22,7 @@ else
 # CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` --std=c++17 -fPIC -O2 $(DEBUGON) -I src -Wl,--no-as-needed -Wall -Wno-deprecated-register -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS)
  
 endif
-LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -lPythia6  -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran $(QTLIBS)
+LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -L${JUNO_EXTLIB_pythia6_HOME}/lib -lPythia6  -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran $(QTLIBS)
 LD            = g++
 CXX           = g++
 CC            = g++
@@ -32,11 +32,11 @@ FC            = gfortran
 		g++ ${CXXFLAGS} -c $< -o $@
 
 %.o: %.f
-		gfortran  -c $< -o $@
+		gfortran -fPIC -c $< -o $@
 
 TRGTS = $(addprefix $(BIN)/,\
         nuwro kaskada myroot glue event1.so nuwro2neut nuwro2nuance nuwro2rootracker\
-        dumpParams reweight_to reweight_along whist nuwro_metropolis ) 
+        dumpParams reweight_to reweight_along whist nuwro_metropolis libnuwro_interface.so ) 
 		# test_beam_rf test_makehist test_nucleus test_beam 
         # fsi niwg ladek_topologies test mb_nce_run ganalysis 
         # )
@@ -58,6 +58,7 @@ GUI_OBJS += $(patsubst src/gui/C%.cc,src/gui/moc_C%.o,$(wildcard src/gui/C*.cc))
 EVENT_OBJS =  $(addprefix src/, event1.o  pdg.o particle.o generatormt.o dirs.o event1Dict.o)
 
 BIN=bin
+# LIB=lib
 #BIN=.
 
 all:            $(TRGTS)
@@ -80,6 +81,14 @@ $(BIN)/nuwro_metropolis:   $(addprefix src/,\
         nuwro_metropolis.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  nuwro_metropolis_main.o) \
         $(EVENT_OBJS) $(SF_OBJS) $(DIS_OBJS) $(MEC_OBJS)
 		$(LINK.cc) $^ -o $@
+
+$(BIN)/libnuwro_interface.so: $(addprefix src/,\
+        pauli.o cohevent2.o cohdynamics2.o qelevent1.o hypevent.o hyperon_interaction.o hyperon_cascade.o lepevent.o nu_e_el_sigma.o\
+        qel_sigma.o kinsolver.o kinematics.o pdg.o target_mixer.o nucleus.o sfevent.o ff.o dirs.o rpa_2013.o\
+        nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o rew/rewparams.o\
+        nuwro_metropolis.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  libnuwro.o) \
+        $(EVENT_OBJS) $(SF_OBJS) $(DIS_OBJS) $(MEC_OBJS)
+		$(LD) -shared  $(LDFLAGS) $^ $(LIBS) -o $@
 
 $(BIN)/kaskada:  $(addprefix src/,\
         scatter.o kaskada7.o Interaction.o input_data.o data_container.o hyperon_cascade.o rew/rewparams.o\
@@ -176,7 +185,7 @@ distclean:;     @rm -f $(TRGTS) *.o *.d src/event1Dict.* */event1Dict_rdict.pcm 
 src/event1Dict.h src/event1Dict.cc:  src/params_all.h src/params.h src/event1.h src/event1LinkDef.h src/event1.o
 		@echo "Generating dictionary ..."
 		cd src;${ROOTSYS}/bin/rootcint -f event1Dict.cc -c event1.h event1LinkDef.h;cd ..
-		cp src/event1Dict_rdict.pcm bin
+		cp src/event1Dict_rdict.pcm lib
 
 src/params_all.h:  src/params.xml src/params.h src/params.sed Makefile
 		@echo "Building params_all.h"

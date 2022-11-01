@@ -1,6 +1,5 @@
 #include <nuwro_metropolis.h>
 
-NuWro_metropolis nuwro_metropolis;
 int main(int argc, char **argv) {
 
   cout << R"(
@@ -28,7 +27,7 @@ int main(int argc, char **argv) {
  |____________________________________________________________________________|
              )"
        << endl;
-
+  NuWro_metropolis nuwro_metropolis;
   nuwro_metropolis.main(argc, argv);
   return 0;
 }

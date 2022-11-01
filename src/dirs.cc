@@ -66,6 +66,15 @@ void set_dirs (char* exename)
 	   }
 }
 
+void set_dir_by_env(){
+		 char *nuwro_dir=getenv("NUWRO");
+	 if(nuwro_dir)
+	   {bin_dir=string(nuwro_dir)+"/";
+	   	data_dir=bin_dir+"data/";
+	    return;
+	   }
+}
+
 bool open_data_file(ifstream& incfile,string name)
 {
 		incfile.open(name.c_str());

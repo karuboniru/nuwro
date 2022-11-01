@@ -76,6 +76,7 @@ NuWro_metropolis::NuWro_metropolis()
 }
 
 NuWro_metropolis::NuWro_metropolis(const char *filename) : NuWro_metropolis() {
+  set_dir_by_env();
   init(filename);
 }
 
@@ -714,17 +715,17 @@ void NuWro_metropolis::real_events(params &p) {
   frame_bottom();
 }
 
-const event &NuWro_metropolis::get_event() {
-
+event NuWro_metropolis::get_event() {
   std::uniform_int_distribution<> dis(0, enabled_dyns.size() - 1);
-  bool accepted = false;
   for (int j{}; j < 100; j++) {
     auto e = new event();
     e->dyn = enabled_dyns[dis(gen)];
     makeevent(e, p);
-    accepted |= sampler.update_state(e);
+    sampler.update_state(e);
   }
-  return sampler.get_state();
+  event e = sampler.get_state();
+  finishevent(&e, p);
+  return e;
 }
 
 void NuWro_metropolis::kaskada_redo(string input, string output) {

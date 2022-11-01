@@ -1,7 +1,22 @@
+#include "libnuwro.h"
 #include "nuwro_metropolis.h"
-// #include <thread>
+#include <memory>
 
-const event & get_event(const char *filename){
-  thread_local NuWro_metropolis nuwro_metropolis(filename);
-  return nuwro_metropolis.get_event();
+extern "C" {
+void shhpythiaitokay_(void);
+void youcanspeaknowpythia_(void);
 }
+
+nuwro_interface::nuwro_interface(const char *filename) {
+  shhpythiaitokay_();
+  instance = new NuWro_metropolis(filename);
+}
+
+nuwro_interface::~nuwro_interface() { delete instance; }
+
+nuwro_interface::nuwro_interface(nuwro_interface &&other) {
+  instance = other.instance;
+  other.instance = nullptr;
+}
+
+event nuwro_interface::gen_event() { return instance->get_event(); }

@@ -52,9 +52,9 @@ add_custom_command(
 add_library(event SHARED ${EVENT_SOURCES})
 add_dependencies(event params_header)
 
-add_library(libnuwro SHARED libnuwro.cc ${EVENT_SOURCES})
-add_dependencies(libnuwro params_header)
-target_link_libraries(libnuwro ${EXTERNAL_LIBS} event1 common1 dis1 sf1)
+add_library(nuwro_interface SHARED libnuwro.cc nuwro_metropolis.cc ${EVENT_SOURCES})
+add_dependencies(nuwro_interface params_header)
+target_link_libraries(nuwro_interface ${EXTERNAL_LIBS} event1 common1 dis1 sf1)
 
 add_library(event1 STATIC ${EVENT_SOURCES})
 add_dependencies(event1 params_header)
@@ -77,7 +77,6 @@ add_dependencies(dis1 params_header)
 add_library(rew1 STATIC ${REW_SOURCES})
 add_dependencies(rew1 params_header)
 target_link_libraries(rew1 ${EXTERNAL_LIBS} common1 dis1)
-
 
 
 add_executable(nuwro main.cc nuwro.cc)
@@ -152,10 +151,10 @@ install(TARGETS nuwro kaskada myroot nuwro2neut nuwro2nuance nuwro2rootracker
         # niwg fsi ganalysis mb_nce_run ladek_topologies 
         # test_nucleus test_beam test_beam_rf test_makehist
         DESTINATION bin)
-install(TARGETS event DESTINATION lib)
+install(TARGETS nuwro_interface event DESTINATION lib)
 install(FILES event1Dict_rdict.pcm DESTINATION bin OPTIONAL) # OPTIONAL necessary for ROOT5
 install(FILES event1Dict_rdict.pcm DESTINATION lib OPTIONAL) # OPTIONAL necessary for ROOT5
 install(DIRECTORY ../data/  DESTINATION data) # data files are needed for nuwro run 
 install(FILES params.h vec.h dirs.h params_all.h particle.h generatormt.h 
-              jednostki.h  pdg.h vect.h vecrand.h event1.h
+              jednostki.h  pdg.h vect.h vecrand.h event1.h libnuwro.h
         DESTINATION include) # may be useful for ROOT6

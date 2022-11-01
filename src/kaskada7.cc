@@ -41,12 +41,12 @@ int kaskada::kaskadaevent()
   prepare_particles();    // copy all nucleons and pions from primary vertex (out) to queue
                           // and other particles to output (post)
 
-  if (e->in[0].lepton())  // if lepton scattering -> remove nucleon from primary vertex 
-                          // (in pion or nucleon scattering there is no primary vertex just the cascade)
-  {
-    for(int i=1;i< e->in.size();i++)
-      nucl->remove_nucleon(e->in[i]); // ignores nonnucleons
-  }
+  // if (e->in[0].lepton())  // if lepton scattering -> remove nucleon from primary vertex 
+  //                         // (in pion or nucleon scattering there is no primary vertex just the cascade)
+  // {
+  for (int i = 0; i < e->in.size(); i++)
+    nucl->remove_nucleon(e->in[i]); // ignores nonnucleons
+  // }
 
   if(not par.kaskada_on)  // skip the cascade if it is turn off in params,
                           // but make sure about the energy balance

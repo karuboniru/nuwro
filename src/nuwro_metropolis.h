@@ -11,6 +11,7 @@
 #include "target_mixer.h"
 #include <ostream>
 #include <unordered_map>
+#include <string>
 
 class NuWro_metropolis {
 public:
@@ -31,8 +32,8 @@ public:
   void set(params &p);
   void refresh_target(params &p);
   // void refresh_dyn (params &p);
-  void pot_report(ostream &, bool format);
-	const event & get_event();
+  void pot_report(std::ostream &, bool format);
+	event get_event();
   NuWro_metropolis();
   NuWro_metropolis(const char * filename);
   ~NuWro_metropolis();
@@ -53,5 +54,5 @@ private:
 	std::mt19937 gen;
 };
 
-extern NuWro_metropolis nuwro_metropolis;
+// extern NuWro_metropolis nuwro_metropolis;
 #endif
