@@ -22,7 +22,7 @@ else
 # CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` --std=c++17 -fPIC -O2 $(DEBUGON) -I src -Wl,--no-as-needed -Wall -Wno-deprecated-register -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS)
  
 endif
-LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -lPythia6  -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran $(QTLIBS)
+LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -L${JUNO_EXTLIB_pythia6_HOME}/lib -lPythia6  -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran $(QTLIBS)
 LD            = g++
 CXX           = g++
 CC            = g++
@@ -32,11 +32,11 @@ FC            = gfortran
 		g++ ${CXXFLAGS} -c $< -o $@
 
 %.o: %.f
-		gfortran  -c $< -o $@
+		gfortran -fPIC -c $< -o $@
 
 TRGTS = $(addprefix $(BIN)/,\
         nuwro kaskada myroot glue event1.so nuwro2neut nuwro2nuance nuwro2rootracker\
-        dumpParams reweight_to reweight_along whist ) 
+        dumpParams reweight_to reweight_along whist libnuwro_interface.so) 
 		# test_beam_rf test_makehist test_nucleus test_beam 
         # fsi niwg ladek_topologies test mb_nce_run ganalysis 
         # )
@@ -72,6 +72,14 @@ $(BIN)/nuwro:   $(addprefix src/,\
         nuwro.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  main.o) \
         $(EVENT_OBJS) $(SF_OBJS) $(DIS_OBJS) $(MEC_OBJS)
 		$(LINK.cc) $^ -o $@
+
+$(BIN)/libnuwro_interface.so: $(addprefix src/,\
+        pauli.o cohevent2.o cohdynamics2.o qelevent1.o hypevent.o hyperon_interaction.o hyperon_cascade.o lepevent.o nu_e_el_sigma.o\
+        qel_sigma.o kinsolver.o kinematics.o pdg.o target_mixer.o nucleus.o sfevent.o ff.o dirs.o rpa_2013.o\
+        nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o rew/rewparams.o\
+        nuwro.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  libnuwro.o) \
+        $(EVENT_OBJS) $(SF_OBJS) $(DIS_OBJS) $(MEC_OBJS)
+		$(LD) -shared  $(LDFLAGS) $^ $(LIBS) -o $@
 
 $(BIN)/kaskada:  $(addprefix src/,\
         scatter.o kaskada7.o Interaction.o input_data.o data_container.o hyperon_cascade.o rew/rewparams.o\

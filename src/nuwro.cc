@@ -73,6 +73,11 @@ NuWro::NuWro()
 	_nucleus = NULL;
 }
 
+NuWro::NuWro(const char *filename) : NuWro() {
+  set_dir_by_env();
+  init(filename);
+}
+
 void NuWro :: set (params &par)
 {	
 	p = par;
@@ -218,6 +223,68 @@ void NuWro::init (int argc, char **argv)
         cerr<<"No beam defined."<<endl;
         exit(5);
       }
+    }
+
+  // load the input data
+  cout << "     -> Loading external physical data..." << endl;
+  input.initialize( p );
+  input.load_data();
+
+  cout << "     -> Configuring form factors..." << endl;
+  ff_configure(p);
+
+  cout << "     -> Extablishing the choice of dynamics..." << endl;
+  refresh_dyn(p);
+
+	if (p.use_mh){
+		initialize_dynamics_list();
+	}
+
+  frame_bottom();
+}
+
+void NuWro::init (const char *filename)
+{
+	frame_top("Simulation parameters");
+
+	//dismode=false;
+	dismode=true;
+	p.read (filename);
+	p.list (cout);
+	p.list (string(a.output)+".par");
+	p1=&p;
+	rew.init(p);
+	_progress.open(a.progress);
+	frandom_init(p.random_seed);
+
+	frame_bottom();
+
+	frame_top("Initialize the simulation");
+
+	if(p.beam_test_only==0 && p.kaskada_redo==0)
+		if(p.dyn_dis_nc or p.dyn_res_nc  or p.dyn_dis_cc or p.dyn_res_cc )
+	{
+		cout << "     -> Calculating the single-pion functions..." << endl;
+		singlepion (p);
+	}
+	if(p.kaskada_redo==0)
+	{
+		cout << "     -> Building the target nuclei..." << endl;
+		_nucleus = make_nucleus(p);
+		if(p.target_type==1)
+			_mixer=new target_mixer(p);
+		else
+			_mixer = NULL;
+		cout << "     -> Constructing the detector..." << endl;
+		_detector=make_detector(p);
+        
+		cout << "     -> Creating the beam..." << endl;
+		_beam=create_beam(p,_detector);
+		if(_beam==NULL)
+			{
+                cerr<<"No beam defined."<<endl;
+                exit(5);
+            }
     }
 
   // load the input data

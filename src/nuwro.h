@@ -20,6 +20,7 @@ class NuWro
 		void finishevent(event* e, params &p);
 		void raport(double i, double n, const char* text, int precision=1000, int k=-1, string label="", bool toFile=false);
 		void init  (int argc, char **argv);
+		void init  (const char * filename);
 		void test_events(params &p);
 		void user_events(params &p);
 		void UserAction(params& p);
@@ -32,6 +33,7 @@ class NuWro
 		void refresh_dyn (params &p);
 		void pot_report(ostream&, bool format);
 		NuWro ();
+		NuWro (const char * filename);
 		~NuWro();
 		// Metropolis-Hastings algorithm:
 		void initialize_dynamics_list();
