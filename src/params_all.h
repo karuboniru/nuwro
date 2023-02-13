@@ -146,4 +146,7 @@ PARAM(double,res_dis_blending_end,1900)\
 PARAM(string,table_path,"")\
 PARAM(bool,kaskada_events,0)\
 PARAM(string,kaskada_events_file,"")\
+PARAM(bool,use_mh,0)\
+PARAM(int,mh_sample_interval,80)\
+PARAM(bool,use_weighted_channel,1)\
 
