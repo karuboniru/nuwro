@@ -12,24 +12,26 @@ OS := $(shell uname)
 VERSION := $(shell git describe --tags)
 
 DEBUG         = 1
-#DEBUGON = -g
-#CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -O2 -I src
+DEBUGON = -g 
+COMFLAGS = -Wall -fopenmp -flto=auto
+COMPILER = c++
+#CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -flto=auto -O2 -I src
 ifeq ($(OS),Darwin)
   # Flags for OSX
-  CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -O2 $(DEBUGON) -I src -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
+  CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -fPIC -O2 $(DEBUGON) $(COMFLAGS) -I src -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
 else
   # Flags for others
-  CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -g -std=c++0x -fopenmp -fPIC -O2 $(DEBUGON) -I src -Wl,--no-as-needed -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
+  CXXFLAGS      = `${ROOTSYS}/bin/root-config --cflags` -g  -march=native -std=c++17  -fPIC -O2 $(DEBUGON) $(COMFLAGS) -I src -Wl,--no-as-needed -Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function -Wno-unused-but-set-variable -Wno-reorder $(QTINCLUDEDIRS) -DVERSION=\"$(VERSION)\"
 endif
 #LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -lPythia6 -lEG -lEGPythia6 -lCore  -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lGeom -lpthread -lm -ldl -rdynamic -lHist $(QTLIBS)
-LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -lPythia6 -fopenmp -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran $(QTLIBS)
-LD	      = g++
-CXX	      = g++
-CC 	      = g++
+LDFLAGS       = `${ROOTSYS}/bin/root-config --libs` -lPythia6 -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran $(QTLIBS) $(COMFLAGS)
+LD	      = $(COMPILER)
+CXX	      = $(COMPILER)
+CC 	      = $(COMPILER)
 FC            = gfortran
 
 %.o: %.cc
-		g++ ${CXXFLAGS} -c $< -o $@
+		$(COMPILER) ${CXXFLAGS} -c $< -o $@
 
 %.o: %.f
 		gfortran  -c $< -o $@
@@ -37,7 +39,7 @@ FC            = gfortran
 TRGTS =         $(addprefix $(BIN)/,nuwro kaskada myroot glue event1.so nuwro2neut nuwro2nuance nuwro2rootracker\
                 dumpParams test_beam_rf test_makehist test_nucleus test_beam \
                 fsi niwg ladek_topologies test mb_nce_run ganalysis reweight_to reweight_along whist\
-								mktabular mktabular2d\
+								mktabular mktabular2d nuwro_metropolis\
                 )
 
 DIS=    charge.o LeptonMass.o parameters.o grv94_bodek.o dis_cr_sec.o  dis_nc.o dis_cc_neutron.o delta.o dis2res.o \
@@ -69,7 +71,16 @@ $(BIN)/nuwro:   $(addprefix src/, event1.o event1dict.o generatormt.o particle.o
         nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o\
         nuwro.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  main.o) \
         $(SF_OBJS) $(DIS_OBJS) $(ESPP_OBJS) $(HYBRID_OBJS)
-		$(LINK.cc) $^ -o $@
+		$(LINK.cc) $^ -fwhole-program -o $@
+
+$(BIN)/nuwro_metropolis:   $(addprefix src/, event1.o event1dict.o generatormt.o particle.o pauli.o cohevent2.o cohdynamics2.o qelevent1.o hipevent.o\
+	    mecdynamics.o mecevent.o mecevent_tem.o mecevent_Nieves.o mecevent_SuSA.o mecevent_common.o e_el_event.o e_el_sigma.o\
+	    mecdynamics2.o mecevent2.o rew/rewparams.o\
+        qel_sigma.o kinsolver.o kinematics.o pdg.o target_mixer.o nucleus.o  sfevent.o ff.o dirs.o rpa_2013.o\
+        nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o\
+       beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  nuwro_metropolis_main.o nuwro_metropolis.o) \
+        $(SF_OBJS) $(DIS_OBJS) $(ESPP_OBJS) $(HYBRID_OBJS)
+		$(LINK.cc) $^ -fwhole-program -o $@
 
 $(BIN)/mktabular:   $(addprefix src/, event1.o event1dict.o generatormt.o particle.o pauli.o cohevent2.o cohdynamics2.o qelevent1.o hipevent.o\
 	    mecdynamics.o mecevent.o mecevent_tem.o mecevent_Nieves.o mecevent_SuSA.o mecevent_common.o e_el_event.o e_el_sigma.o\
@@ -78,7 +89,7 @@ $(BIN)/mktabular:   $(addprefix src/, event1.o event1dict.o generatormt.o partic
         nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o\
         nuwro.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  mktabular.o) \
         $(SF_OBJS) $(DIS_OBJS) $(ESPP_OBJS) $(HYBRID_OBJS)
-		$(LINK.cc) $^ -o $@
+		$(LINK.cc) $^ -fwhole-program -o $@
 
 $(BIN)/mktabular2d:   $(addprefix src/, event1.o event1dict.o generatormt.o particle.o pauli.o cohevent2.o cohdynamics2.o qelevent1.o hipevent.o\
 	    mecdynamics.o mecevent.o mecevent_tem.o mecevent_Nieves.o mecevent_SuSA.o mecevent_common.o e_el_event.o e_el_sigma.o\
@@ -87,7 +98,7 @@ $(BIN)/mktabular2d:   $(addprefix src/, event1.o event1dict.o generatormt.o part
         nucleus_data.o isotopes.o elements.o rew/PythiaQuiet.o\
         nuwro.o beam.o nd280stats.o beamHist.o coh.o fsi.o pitab.o scatter.o kaskada7.o Interaction.o input_data.o data_container.o  mktabular2d.o) \
         $(SF_OBJS) $(DIS_OBJS) $(ESPP_OBJS) $(HYBRID_OBJS)
-		$(LINK.cc) $^ -o $@
+		$(LINK.cc) $^ -fwhole-program -o $@
 
 $(BIN)/kaskada:   $(addprefix src/, scatter.o generatormt.o particle.o event1.o event1dict.o kaskada7.o Interaction.o input_data.o data_container.o dirs.o\
 				  pdg.o nucleus.o kaskada.o fsi.o pitab.o nucleus_data.o isotopes.o elements.o rew/rewparams.o)
