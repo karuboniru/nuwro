@@ -114,4 +114,6 @@ PARAM(bool,pauli_blocking,1)\
 PARAM(bool,mixed_order,1)\
 PARAM(double,res_dis_blending_start,2800)\
 PARAM(double,res_dis_blending_end,3200)\
+PARAM(int,mh_sample_interval,80)\
+PARAM(bool,use_weighted_channel,1)\
 
