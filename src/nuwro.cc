@@ -1,5 +1,6 @@
 #include <iomanip>
 #include <sstream>
+#include <string_view>
 #include <vector>
 #include "event1.h"
 #include "TROOT.h"
@@ -73,9 +74,17 @@ NuWro::NuWro()
 	_nucleus = NULL;
 }
 
-NuWro::NuWro(const char *filename) : NuWro() {
-  set_dir_by_env();
-  init(filename);
+NuWro::NuWro(const char *filename, std::vector<std::string> args) : NuWro() {
+		set_dir_by_env();
+		p.read(filename);
+		std::stringstream ss{};
+		for (auto &&s : args) {
+			ss << s << "\n";
+		}
+		p.read(ss, "command line");
+		p.list(cout);
+		p.list(string(a.output) + ".par");
+		init();
 }
 
 void NuWro :: set (params &par)
@@ -243,15 +252,13 @@ void NuWro::init (int argc, char **argv)
   frame_bottom();
 }
 
-void NuWro::init (const char *filename)
+void NuWro::init ()
 {
 	frame_top("Simulation parameters");
 
 	//dismode=false;
 	dismode=true;
-	p.read (filename);
-	p.list (cout);
-	p.list (string(a.output)+".par");
+
 	p1=&p;
 	rew.init(p);
 	_progress.open(a.progress);
