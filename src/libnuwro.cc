@@ -1,15 +1,17 @@
 #include "libnuwro.h"
 #include "nuwro.h"
 #include <memory>
+#include <string>
+#include <vector>
 
 extern "C" {
 void shhpythiaitokay_(void);
 void youcanspeaknowpythia_(void);
 }
 
-nuwro_interface::nuwro_interface(const char *filename) {
+nuwro_interface::nuwro_interface(const char *filename, std::vector<std::string> args) {
   shhpythiaitokay_();
-  instance = new NuWro(filename);
+  instance = new NuWro(filename, args);
 }
 
 nuwro_interface::~nuwro_interface() { delete instance; }

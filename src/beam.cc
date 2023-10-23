@@ -7,6 +7,7 @@
 #include "nozero_array.h"
 #include "geomy.h"
 #include "beam_atmo.h"
+#include "beam_atmo3d.h"
 
 
 void CreateNewHistogram( int dimsizes[5], string hist_out );
@@ -55,6 +56,11 @@ beam * create_beam(params &p, geomy *detector)
 	{
 	  cout << "Using atmospheric neutrino flux." << endl;
 	  return new beam_atmo( p );
+	}
+	case 8:
+	{
+	  cout << "Using atmospheric neutrino flux." << endl;
+	  return new beam_atmo3d( p );
 	}
 	default:
 	{
