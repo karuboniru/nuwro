@@ -14,6 +14,11 @@ nuwro_interface::nuwro_interface(const char *filename, std::vector<std::string> 
   instance = new NuWro(filename, args);
 }
 
+nuwro_interface::nuwro_interface(const char *filename) {
+  shhpythiaitokay_();
+  instance = new NuWro(filename);
+}
+
 nuwro_interface::~nuwro_interface() { delete instance; }
 
 nuwro_interface::nuwro_interface(nuwro_interface &&other) {
