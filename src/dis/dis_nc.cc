@@ -10,6 +10,11 @@
 //Cross section for inelastic scattering on proton
 // nu + p --> nu +X (NC, lepton)
 
+double xx_boundary_normalize(double xx_in){
+  if (xx_in <= 0) return nextafter(0., 1.);
+  if (xx_in >= 1) return nextafter(1., 0.);
+  return xx_in;
+}
 
 double
 sigma_xy_nc_nu_p_Paschos (double E, double xx, double yy, double m)
@@ -36,7 +41,7 @@ sigma_xy_nc_nu_p_Paschos (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_Paschos (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -66,7 +71,7 @@ sigma_xy_nc_nu_p_grv (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_grv (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_grv (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -96,7 +101,7 @@ sigma_xy_nc_nu_p_u (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_u (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_u (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -127,7 +132,7 @@ sigma_xy_nc_nu_p_d (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_d (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_d (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -161,7 +166,7 @@ sigma_xy_nc_nu_p_ubar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_ubar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_ubar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -196,7 +201,7 @@ sigma_xy_nc_nu_p_dbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_dbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_dbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -227,7 +232,7 @@ sigma_xy_nc_nu_p_s (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_s (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_s (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -262,7 +267,7 @@ sigma_xy_nc_nu_p_sbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_p_sbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_p_sbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -294,7 +299,7 @@ sigma_xy_nc_anu_p_Paschos (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_Paschos (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -326,7 +331,7 @@ sigma_xy_nc_anu_p_grv (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_grv (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_grv (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -353,7 +358,7 @@ sigma_xy_nc_anu_p_u (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_u (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_u (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -381,7 +386,7 @@ sigma_xy_nc_anu_p_d (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_d (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_d (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -409,7 +414,7 @@ sigma_xy_nc_anu_p_ubar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_ubar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_ubar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -438,7 +443,7 @@ sigma_xy_nc_anu_p_dbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_dbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_dbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -466,7 +471,7 @@ sigma_xy_nc_anu_p_s (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_s (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_s (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -495,7 +500,7 @@ sigma_xy_nc_anu_p_sbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_p_sbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_p_sbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -533,7 +538,7 @@ sigma_xy_nc_nu_n_Paschos (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_Paschos (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -584,7 +589,7 @@ sigma_xy_nc_nu_n_grv (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n_grv (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_grv (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -605,7 +610,7 @@ cr_sec_nc_nu_n_grv (double E, double W, double nu, double m)
 double
 cr_sec_nc_nu_n_u (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_u (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -636,7 +641,7 @@ sigma_xy_nc_nu_n_d (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n_d (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_d (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -670,7 +675,7 @@ sigma_xy_nc_nu_n_ubar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n_ubar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_ubar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -705,7 +710,7 @@ sigma_xy_nc_nu_n_dbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n_dbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_dbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -736,7 +741,7 @@ sigma_xy_nc_nu_n_s (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n_s (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_s (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -771,7 +776,7 @@ sigma_xy_nc_nu_n_sbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_nu_n_sbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_nu_n_sbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -803,7 +808,7 @@ sigma_xy_nc_anu_n_Paschos (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_Paschos (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -835,7 +840,7 @@ sigma_xy_nc_anu_n_grv (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_grv (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_grv (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -862,7 +867,7 @@ sigma_xy_nc_anu_n_u (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_u (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_u (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -890,7 +895,7 @@ sigma_xy_nc_anu_n_d (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_d (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_d (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -918,7 +923,7 @@ sigma_xy_nc_anu_n_ubar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_ubar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_ubar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -947,7 +952,7 @@ sigma_xy_nc_anu_n_dbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_dbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_dbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -975,7 +980,7 @@ sigma_xy_nc_anu_n_s (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_s (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_s (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
@@ -1004,7 +1009,7 @@ sigma_xy_nc_anu_n_sbar (double E, double xx, double yy, double m)
 double
 cr_sec_nc_anu_n_sbar (double E, double W, double nu, double m)
 {
-  double xx = (M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu);
+  double xx = xx_boundary_normalize((M2 - W * W + 2 * M12 * nu) / (2 * M12 * nu));
   double yy = nu / E;
   return sigma_xy_nc_anu_n_sbar (E, xx, yy, m) * W / (M12 * E * nu)	//jakobian
     ;
