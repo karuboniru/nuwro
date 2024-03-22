@@ -76,7 +76,7 @@ void resevent2(params &p, event &e, nucleus &t, bool cc) {
 
   res_xsec xsec(kin, cc);  // cross section handler - initialize SPP indices and DIS constribution
 
-  if (not kin.is_above_pythia_threshold() || xsec.is_no_dis()) {
+  if ((!(p.dyn_dis_cc || p.dyn_dis_nc)) || (not kin.is_above_pythia_threshold() || xsec.is_no_dis())) {
     xsec.set_xsec_nopythia(kin, p);           // initialize xsec struct with SPP parameters
     e.weight = xsec.get_total(kin.jacobian);  // save total cross section
 
