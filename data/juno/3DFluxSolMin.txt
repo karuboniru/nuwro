@@ -1,0 +1,5 @@
+beam_type = 8
+beam_atmo_files = 14 juno/hkkm-3d/solmin/nuwro/numu.txt
+beam_atmo_files += -14 juno/hkkm-3d/solmin/nuwro/numu_bar.txt
+beam_atmo_files += 12 juno/hkkm-3d/solmin/nuwro/nue.txt
+beam_atmo_files += -12 juno/hkkm-3d/solmin/nuwro/nue_bar.txt

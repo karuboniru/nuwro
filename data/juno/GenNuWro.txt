@@ -1,0 +1,3 @@
+use_mh = 1
+mh_sample_interval = 200
+use_weighted_channel = 1

@@ -1,0 +1,2 @@
+beam_type = 0
+beam_energy = 0 20000 // 0 - 20 GeV

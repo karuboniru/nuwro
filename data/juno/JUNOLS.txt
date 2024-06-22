@@ -1,0 +1,4 @@
+target_type = 1
+target_content = 1 0 120x
+target_content += 6 6 73x
+
