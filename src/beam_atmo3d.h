@@ -45,6 +45,7 @@ public:
     stringstream in(p.beam_atmo_files);
     int pdg = 0;
     string fname;
+    double s0 = 0, s1 = 0;
     while (in >> pdg >> fname) {
       if (abs(pdg) == 12 || abs(pdg) == 14 || abs(pdg) == 16) {
 
@@ -63,7 +64,7 @@ public:
       bin3d b;
       b.pdg = pdg;
       string line;
-      double s0 = 0, s1 = 0, w, E;
+      double w, E;
       while (getline(atmo, line))
         if (line[0] != '#') {
           stringstream as(line);
