@@ -83,7 +83,8 @@ NuWro::NuWro(const char *filename, std::vector<std::string> args) : NuWro() {
 		}
 		p.read(ss, "command line");
 		p.list(cout);
-		p.list(string(a.output) + ".par");
+		if(!p.use_mh)
+			p.list(string(a.output) + ".par");
 		init();
 }
 
@@ -198,7 +199,8 @@ void NuWro::init (int argc, char **argv)
 	p.read (a.input);
 	p.read (a.params, "command line");
 	p.list (cout);
-	p.list (string(a.output)+".par");
+	if(!p.use_mh)
+		p.list (string(a.output)+".par");
 	p1=&p;
 	rew.init(p);
 	_progress.open(a.progress);
@@ -814,27 +816,31 @@ void NuWro::test_events(params & p)
 			prefix="";
 //		else 
 //			prefix=a.output;
-		hq2.plot(prefix+"q2.txt",GeV2,1e-38*cm2/GeV2);
-		hq0.plot(prefix+"q0.txt",GeV,1e-38*cm2/GeV);
-		hqv.plot(prefix+"qv.txt",GeV,1e-38*cm2/GeV);
-		hT.plot(prefix+"T.txt",GeV,1e-38*cm2/GeV);
-		
-		ofstream totals ((prefix+"totals.txt").c_str(),ios::app);
-		totals<<p.beam_energy;
-		double tot=0;
-		
-		int j=0;
-		for(int i=0;i<_procesy.size();i++)
-		{
-			while(j++<_procesy.dyn(i))
-				totals << ' '<<0; // cross section of disabled channels
-			totals << ' '<<_procesy.avg(i);
-			tot+=_procesy.avg(i);
+		if(!p.use_mh) {		
+			hq2.plot(prefix+"q2.txt",GeV2,1e-38*cm2/GeV2);
+			hq0.plot(prefix+"q0.txt",GeV,1e-38*cm2/GeV);
+			hqv.plot(prefix+"qv.txt",GeV,1e-38*cm2/GeV);
+			hT.plot(prefix+"T.txt",GeV,1e-38*cm2/GeV);
 		}
-		while(j++<10)
-			totals << ' '<<0; // cross section of disabled channels
+		
+		if(!p.use_mh){
+			ofstream totals ((prefix+"totals.txt").c_str(),ios::app);
+			totals<<p.beam_energy;
+			double tot=0;
+			
+			int j=0;
+			for(int i=0;i<_procesy.size();i++)
+			{
+				while(j++<_procesy.dyn(i))
+					totals << ' '<<0; // cross section of disabled channels
+				totals << ' '<<_procesy.avg(i);
+				tot+=_procesy.avg(i);
+			}
+			while(j++<10)
+				totals << ' '<<0; // cross section of disabled channels
 
-		totals<<endl;
+			totals<<endl;
+		}
 		pot_report(cout,true);		
 		if(_detector)
 		{   ofstream  potinfo("POTinfo.txt");
@@ -904,6 +910,7 @@ void NuWro::real_events(params& p)
 
 	/// calculate desired number of events for each dynamics
 	_procesy.calculate_counts(p.number_of_events);
+	if(!p.use_mh)
 	{							 /// Write cross sections and counts to screen and file
 		ofstream f((string(a.output)+".txt").c_str());
 		_procesy.short_report(cout,true);
@@ -1055,7 +1062,7 @@ void NuWro::real_events(params& p)
 	delete ff;
 	_procesy.report();
 	pot_report(cout,true);
-	if(_detector)
+	if(_detector && !p.use_mh)
 	{   ofstream  potinfo("POTinfo.txt");
 		pot_report(potinfo);
 	}
@@ -1159,7 +1166,6 @@ void NuWro::real_events_mh(params &p) {
     tf->Fill();
   }
   std::string xsec_log = a.output + ".xsec"s;
-  std::ofstream xsec_file(xsec_log);
   double overall_xsec{};
   for (size_t i = 0; i < enabled_dyns.size(); i++) {
     if (channel_weight_sum[i]) {
@@ -1169,7 +1175,6 @@ void NuWro::real_events_mh(params &p) {
          << " count: " << channel_count_final[enabled_dyns[i]] << '\n'
          << '\n';
       std::cout << ss.str();
-      xsec_file << ss.str();
       overall_xsec += channel_weight_sum[i] / channel_weight_sum_fraction[i];
     }
   }
@@ -1179,7 +1184,6 @@ void NuWro::real_events_mh(params &p) {
        << '\n'
        << "estimated xsec: " << overall_xsec << '\n';
     std::cout << ss.str();
-    xsec_file << ss.str();
   }
   // TVectorD xsecs(1);
   // xsecs[0] = overall_xsec;
@@ -1260,7 +1264,8 @@ void NuWro::main (int argc, char **argv)
 				}
 			}
 		}
-		genrand_write_state();
+		if(!p.use_mh)
+			genrand_write_state();
 	}
 	catch(string s)
 	{
