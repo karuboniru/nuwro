@@ -1117,6 +1117,8 @@ event NuWro::get_event() {
     auto channel_index = sample_channel(frandom());
     // auto channel_index = dis2(gen);
     e->dyn = enabled_dyns[channel_index];
+    if (_mixer)
+      _mixer->prepare(p);
     makeevent(e, p);
     auto thisbias = 1 / e->in[0].t;
     auto biased_weight = e->weight * thisbias;
