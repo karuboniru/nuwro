@@ -1,106 +1,164 @@
-cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-project (NUWRO)
+project(NuWro
+  DESCRIPTION "Monte Carlo neutrino event generator"
+  LANGUAGES CXX Fortran
+)
 
-enable_language(Fortran)
+# ---------------------------------------------------------------------------
+# Version from git
+# ---------------------------------------------------------------------------
+find_package(Git QUIET)
+if(Git_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} describe --tags
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE NUWRO_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+endif()
+if(NOT NUWRO_VERSION OR NUWRO_VERSION STREQUAL "")
+  set(NUWRO_VERSION "unknown")
+endif()
+message(STATUS "NuWro version: ${NUWRO_VERSION}")
 
-set (VERBOSE TRUE)
-
-set (CMAKE_SKIP_BUILD_RPATH TRUE)
-
-IF( NOT CMAKE_BUILD_TYPE )
-   SET( CMAKE_BUILD_TYPE Release)
-ENDIF()
-
-execute_process(COMMAND git describe --tags 
-          OUTPUT_VARIABLE NUWRO_VERSION 
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
-
-if (NOT DEFINED ENV{ROOTSYS})
-  message (FATAL_ERROR "$ROOTSYS is not defined, please set up root first.")
+# ---------------------------------------------------------------------------
+# Build type
+# ---------------------------------------------------------------------------
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+    STRINGS Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
-function(GenROOTDictionary)
-endfunction()
-
-execute_process (COMMAND root-config --cflags   OUTPUT_VARIABLE ROOT_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process (COMMAND root-config --libdir   OUTPUT_VARIABLE ROOT_LIBDIR    OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process (COMMAND root-config --version  OUTPUT_VARIABLE ROOT_VERSION   OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process (COMMAND root-config --features OUTPUT_VARIABLE ROOT_FEATURES  OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process (COMMAND root-config --libs     OUTPUT_VARIABLE ROOT_LIBS0     OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process (COMMAND root-config --ldflags  OUTPUT_VARIABLE ROOT_LD_FLAGS  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-
-# remove libaries and directories  from ROOT_LIBS0 to obtain ROOT_LD_FLAGS
-string(REGEX REPLACE " -(l|L)[^ ]* "  " "   CMAKE_LINK_FLAGS " ${ROOT_LIBS0} ") 
-
-# obtain root lib directory
-string(REGEX MATCH "-L([^ ]*)" DUMMY ${ROOT_LIBS0} )
-set(ROOT_LIB_DIR ${CMAKE_MATCH_1}) 
-
-# remove -l from ROOT_LIBS0 to obtain ROOT_LIBS
-set(ROOT_LIBS0 " ${ROOT_LIBS0} -lPythia6  -lEG -lEGPythia6 -lGeom -lMinuit -lgfortran " )
-string(REPLACE " -l" " "  ROOT_LIBS1 ${ROOT_LIBS0})
-# remove non libraries from ROOT_LIBS
-string(REGEX REPLACE " -[^ ]* "    " "  ROOT_LIBS1 " ${ROOT_LIBS1} ") 
-# strip whitespace from ROOT_LIBS
-string(STRIP "${ROOT_LIBS1}" ROOT_LIBS) 
-# semicolon separated list of ROOT libraries
-string(REPLACE " " ";"  ROOT_LIBS ${ROOT_LIBS})
-
-message(STATUS  ROOT_LIBS ${ROOT_LIBS})
-
-message ( STATUS "[ROOT]: root-config --version: "  ${ROOT_VERSION}  )
-message ( STATUS "[ROOT]: root-config --cflags: "   ${ROOT_CXX_FLAGS})
-message ( STATUS "[ROOT]: root-config --libdir: "   ${ROOT_LIBDIR} )
-message ( STATUS "[ROOT]: root-config --features: " ${ROOT_FEATURES} )
-message ( STATUS "[ROOT]: root-config --libs: "     ${ROOT_LIBS0} )
-message ( STATUS "[ROOT]: root libraries: "         ${ROOT_LIBS1} )
-message ( STATUS "[ROOT]: root lib dir: "           ${ROOT_LIB_DIR} )
-
-
-############################### External Libs ##################################
-set(EXTERNAL_LIBS ${ROOT_LIBS})
-################################## COMPILER ####################################
-
-message(STATUS "System:" ${CMAKE_SYSTEM_NAME})
-
-set(CXX_WARNINGS "-Wall -Wno-unused-variable -Wno-sign-compare -Wno-unused-function    -Wno-unknown-warning-option -Wno-unused-but-set-variable -Wmissing-braces ")
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} ${NUWRO_CFLAGS} -std=c++0x -fPIC -O2 -Wl,--no-as-needed -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
+# ---------------------------------------------------------------------------
+# CERN ROOT
+# Use ROOT's own CMake config (find ROOT_DIR from ROOTSYS if not set).
+# ---------------------------------------------------------------------------
+if(NOT ROOT_DIR AND DEFINED ENV{ROOTSYS})
+  set(ROOT_DIR "$ENV{ROOTSYS}/share/root/cmake" CACHE PATH "ROOT CMake config dir" FORCE)
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS} ${CXX_WARNINGS} -Wmissing-braces ${NUWRO_CFLAGS}  -fPIC -O2  -DVERSION=\\\"${NUWRO_VERSION}\\\"  " )
+find_package(ROOT 6 REQUIRED
+  CONFIG
+  COMPONENTS Core RIO Tree Hist Physics MathCore EG Geom Minuit
+)
+# include(${ROOT_USE_FILE})
+
+message(STATUS "ROOT version    : ${ROOT_VERSION}")
+message(STATUS "ROOT include    : ${ROOT_INCLUDE_DIRS}")
+message(STATUS "ROOT lib dir    : ${ROOT_LIBRARY_DIR}")
+
+# ---------------------------------------------------------------------------
+# Pythia6 / EGPythia6
+# Searched in ROOTEGPythia6_ROOT (env or cmake var), then ROOT's lib dir.
+# ---------------------------------------------------------------------------
+if(NOT DEFINED ROOTEGPythia6_ROOT AND DEFINED ENV{ROOTEGPythia6_ROOT})
+  set(ROOTEGPythia6_ROOT "$ENV{ROOTEGPythia6_ROOT}"
+    CACHE PATH "Path to the EGPythia6 / Pythia6 installation prefix")
 endif()
 
-message (STATUS "C++ Compiler      : " ${CXX_COMPILER_NAME})
-message (STATUS "    Release flags : " ${CMAKE_CXX_FLAGS_RELEASE})
-message (STATUS "    Debug flags   : " ${CMAKE_CXX_FLAGS_DEBUG})
-message (STATUS "    Link Flags    : " ${CMAKE_LINK_FLAGS})
+if(ROOTEGPythia6_ROOT)
+  find_library(Pythia6_LIBRARY   NAMES Pythia6
+    PATHS "${ROOTEGPythia6_ROOT}/lib" NO_DEFAULT_PATH REQUIRED)
+  find_library(EGPythia6_LIBRARY NAMES EGPythia6
+    PATHS "${ROOTEGPythia6_ROOT}/lib" NO_DEFAULT_PATH REQUIRED)
+  find_path(Pythia6_INCLUDE_DIR  NAMES TPythia6.h
+    PATHS "${ROOTEGPythia6_ROOT}/include" NO_DEFAULT_PATH)
+else()
+  # Fall back to ROOT's own library directory (some ROOT builds bundle Pythia6)
+  find_library(Pythia6_LIBRARY   NAMES Pythia6
+    HINTS ${ROOT_LIBRARY_DIR} REQUIRED)
+  find_library(EGPythia6_LIBRARY NAMES EGPythia6
+    HINTS ${ROOT_LIBRARY_DIR} REQUIRED)
+  find_path(Pythia6_INCLUDE_DIR  NAMES TPythia6.h
+    HINTS ${ROOT_INCLUDE_DIRS})
+endif()
 
+message(STATUS "Pythia6 library  : ${Pythia6_LIBRARY}")
+message(STATUS "EGPythia6 library: ${EGPythia6_LIBRARY}")
 
-################################################################################
-#                            Specify Target Subdirs
-################################################################################
+# Create imported targets so subdirectories can link them by name
+foreach(_lib Pythia6 EGPythia6)
+  if(NOT TARGET Pythia6::${_lib})
+    add_library(Pythia6::${_lib} UNKNOWN IMPORTED)
+    set_target_properties(Pythia6::${_lib} PROPERTIES
+      IMPORTED_LOCATION "${${_lib}_LIBRARY}")
+  endif()
+endforeach()
 
+if(Pythia6_INCLUDE_DIR)
+  foreach(_lib Pythia6 EGPythia6)
+    set_target_properties(Pythia6::${_lib} PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${Pythia6_INCLUDE_DIR}")
+  endforeach()
+endif()
+
+# ---------------------------------------------------------------------------
+# Fortran runtime
+# When C++ executables link static libs containing Fortran objects, CMake
+# does not automatically pull in the Fortran runtime — list them explicitly.
+# ---------------------------------------------------------------------------
+set(NUWRO_FORTRAN_RUNTIME ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
+
+# ---------------------------------------------------------------------------
+# Global compiler options
+# ---------------------------------------------------------------------------
+add_compile_options(
+  -fPIC
+  -Wall
+  -Wno-unused-variable
+  -Wno-sign-compare
+  -Wno-unused-function
+  -Wno-unused-but-set-variable
+  -Wmissing-braces
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_link_options(-Wl,--no-as-needed)
+endif()
+
+add_compile_definitions(VERSION="${NUWRO_VERSION}")
+
+# ---------------------------------------------------------------------------
+# RPATH: keep full rpath in the build tree; trim to install prefix at install
+# ---------------------------------------------------------------------------
+set(CMAKE_SKIP_BUILD_RPATH        FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH           "${CMAKE_INSTALL_PREFIX}/lib")
+
+# ---------------------------------------------------------------------------
+# Sources
+# ---------------------------------------------------------------------------
 add_subdirectory(src)
 
-################################################################################
-#                            Generate setup.sh
-################################################################################
+# ---------------------------------------------------------------------------
+# Generate setup.sh using configure_file so variables are expanded at
+# configure time (not hardcoded paths at build time).
+# ---------------------------------------------------------------------------
+execute_process(
+  COMMAND root-config --bindir
+  OUTPUT_VARIABLE ROOT_BINDIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
-file(WRITE  ${CMAKE_INSTALL_PREFIX}/setup.sh  "source $ENV{ROOTSYS}/bin/thisroot.sh\n")
-file(APPEND ${CMAKE_INSTALL_PREFIX}/setup.sh "export NUWRO=${PROJECT_SOURCE_DIR}\n")
-file(APPEND ${CMAKE_INSTALL_PREFIX}/setup.sh "export NUWRO_INC=${CMAKE_INSTALL_PREFIX}/include\n")
-file(APPEND ${CMAKE_INSTALL_PREFIX}/setup.sh "export PATH=${CMAKE_INSTALL_PREFIX}/bin:\${PATH}\n")
-if(DEFINED ENV{PYTHIA6})
-  file(APPEND ${CMAKE_INSTALL_PREFIX}/setup.sh "export PYTHIA6=$ENV{PYTHIA6}\n")
-  file(APPEND ${CMAKE_INSTALL_PREFIX}/setup.sh "export LD_LIBRARY_PATH=\${PYTHIA6}:\${LD_LIBRARY_PATH}\n")
+if(EXISTS "${ROOT_BINDIR}/thisroot.sh")
+  set(_thisroot_line "source ${ROOT_BINDIR}/thisroot.sh")
+else()
+  set(_thisroot_line "")
 endif()
-file(APPEND ${CMAKE_INSTALL_PREFIX}/setup.sh "export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:\${LD_LIBRARY_PATH}")
 
+if(ROOTEGPythia6_ROOT)
+  set(_pythia6_env
+    "export LD_LIBRARY_PATH=${ROOTEGPythia6_ROOT}/lib:\${LD_LIBRARY_PATH}")
+else()
+  set(_pythia6_env "")
+endif()
+
+configure_file(
+  "${CMAKE_SOURCE_DIR}/cmake/setup.sh.in"
+  "${CMAKE_BINARY_DIR}/setup.sh"
+  @ONLY
+)
+install(PROGRAMS "${CMAKE_BINARY_DIR}/setup.sh" DESTINATION .)
