@@ -97,41 +97,14 @@ void NuWro :: set (params &par)
 
 void NuWro::initialize_dynamics_list() {
 		enabled_dyns.clear();
-		if (p.dyn_qel_cc)
-						enabled_dyns.push_back(0);
-		if (p.dyn_qel_nc)
-						enabled_dyns.push_back(1);
-		if (p.dyn_res_nc)
-						enabled_dyns.push_back(3);
-		if (p.dyn_res_cc)
-						enabled_dyns.push_back(2);
-		if (p.dyn_dis_cc)
-						enabled_dyns.push_back(4);
-		if (p.dyn_dis_nc)
-						enabled_dyns.push_back(5);
-		if (p.dyn_coh_cc)
-						enabled_dyns.push_back(6);
-		if (p.dyn_coh_nc)
-						enabled_dyns.push_back(7);
-		if (p.dyn_mec_cc)
-						enabled_dyns.push_back(8);
-		if (p.dyn_mec_nc)
-						enabled_dyns.push_back(9);
-		if (p.dyn_hyp_cc)
-						enabled_dyns.push_back(10);
-		if (p.dyn_lep)
-						enabled_dyns.push_back(12);
-		if (p.dyn_qel_el)
-						enabled_dyns.push_back(20);
-		if (p.dyn_res_el)
-						enabled_dyns.push_back(21);
+		for (int i = 0; i < _procesy.size(); i++)
+				enabled_dyns.push_back(_procesy.dyn(i));
 
-		// std::cout << enabled_dyns.size() << "channel enabled" << std::endl;
 		channel_weight_sum.resize(enabled_dyns.size());
 		channel_weight_sum_fraction.resize(enabled_dyns.size());
 		channel_sampleing_weight.resize(enabled_dyns.size());
 		for (auto &&k : channel_sampleing_weight)
-						k = 1. / enabled_dyns.size();
+				k = 1. / enabled_dyns.size();
 }
 
 void NuWro :: refresh_target (params &par)
