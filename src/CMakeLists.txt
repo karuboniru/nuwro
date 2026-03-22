@@ -305,6 +305,10 @@ target_link_libraries(whist PRIVATE event1 ${NUWRO_LINK_LIBS})
 # add_executable(test_makehist test_makehist.cc nd280stats.cc)
 # target_link_libraries(test_makehist PRIVATE event1 ${NUWRO_LINK_LIBS})
 
+add_executable(example_gen example_gen.cc)
+nuwro_target_setup(example_gen)
+target_link_libraries(example_gen PRIVATE nuwrogen)
+
 # ---------------------------------------------------------------------------
 # Installation
 # ---------------------------------------------------------------------------
@@ -313,6 +317,7 @@ install(TARGETS
     nuwro kaskada myroot
     nuwro2neut nuwro2nuance nuwro2rootracker
     glue dumpParams reweight_to reweight_along whist
+    example_gen
   RUNTIME DESTINATION bin
 )
 
