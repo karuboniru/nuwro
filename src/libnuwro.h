@@ -57,6 +57,11 @@ public:
     /// If not called, the NUWRO environment variable is used.
     Generator &with_data_dir(const std::string &path);
 
+    /// Set the random seed passed to frandom_init_no_save().
+    /// 0 (default): seed from time(NULL).
+    /// >1: use value directly as the MT19937 seed for reproducible runs.
+    Generator &seed(int s);
+
     /// Initialise all NuWro internals.  Must be called before gen_event().
     /// Calls NuWro::prepare_mh() internally; no files are written.
     void initialize();

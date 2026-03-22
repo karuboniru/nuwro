@@ -51,6 +51,12 @@ Generator &Generator::with_data_dir(const std::string &path)
     return *this;
 }
 
+Generator &Generator::seed(int s)
+{
+    impl->p.random_seed = s;
+    return *this;
+}
+
 void Generator::initialize()
 {
     if (impl->initialized)
