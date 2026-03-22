@@ -1,6 +1,6 @@
 #!/bin/sh
 @_thisroot_line@
-export NUWRO=@CMAKE_SOURCE_DIR@
+export NUWRO=@CMAKE_INSTALL_PREFIX@
 export NUWRO_INC=@CMAKE_INSTALL_PREFIX@/include
 export PATH=@CMAKE_INSTALL_PREFIX@/bin:${PATH}
 @_pythia6_env@
