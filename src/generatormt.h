@@ -92,6 +92,9 @@ inline double frandom_pow (int n) { return pow(frandom(),1.0/(n+1));}
 /// initialize the random seed_generator
 void frandom_init(int option);
 
+/// same as frandom_init but does not write the random_seed file
+void frandom_init_no_save(int option);
+
 /// read genrand state from file
 void genrand_read_state(const char* file="random_seed");
 

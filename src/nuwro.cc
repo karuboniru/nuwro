@@ -114,7 +114,7 @@ void NuWro::prepare_mh(params &par)
 	shhpythiaitokay_(); // silence Pythia6 banner/warnings (normally called by main())
 	p = par;
 	p.use_mh = 1;
-	frandom_init(p.random_seed);
+	frandom_init_no_save(p.random_seed); // don't write random_seed file in library mode
 
 	if (!p.kaskada_redo && (p.dyn_dis_nc || p.dyn_res_nc || p.dyn_dis_cc || p.dyn_res_cc))
 		singlepion(p);

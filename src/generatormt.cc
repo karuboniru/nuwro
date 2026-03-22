@@ -205,3 +205,13 @@ void frandom_init(int option)
   }
   genrand_write_state();
 }
+
+void frandom_init_no_save(int option)
+{
+  switch(option)
+  {
+    case 0: init_genrand(time(NULL));break;
+    case 1: genrand_read_state();break;
+    default: init_genrand(option);break;
+  }
+}
