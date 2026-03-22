@@ -8,7 +8,23 @@ NuWro's default event generation is a two-phase procedure. First, `test_events()
 
 Then `real_events()` generates the actual output. For each channel k it loops, calling `makeevent` and testing `_procesy.accept(k, weight, bias)`. The acceptance condition is a standard von Neumann rejection: `weight / bias / max_weight > Uniform(0,1)`. Accepted events are stored with `e->weight = _procesy.total()` (the total cross section), so every stored event carries the same weight — the output is unweighted.
 
-The limitation is that the test run must be long enough to find a reliable max weight for each channel. An underestimated max weight causes bias (events above the threshold are never accepted); an overestimated one wastes CPU on rejections.
+#### Max-weight exceedance and retroactive discard
+
+`Mxw` (the running max weight per channel) is updated continuously even during `real_events`, not frozen after the test run. If a new event's `weight/bias` exceeds the current `Mxw`, `accept()` enters the overflow branch:
+
+```
+prevmax = Mxw
+add(i, x, bias)          // Mxw updated to new higher value
+Ready *= prevmax / Mxw   // scale down: retroactively "un-accept" some earlier events
+Ready++                   // accept the current event unconditionally
+return true
+```
+
+Scaling `Ready` down by `prevmax/Mxw` (which is < 1) corrects the acceptance count as if all previously accepted events had been drawn under the new, higher max weight. Because `Ready` drops below `desired`, the generation loop continues and produces additional replacement events — all generated under the correct updated `Mxw`.
+
+The earlier events already written to the per-channel `.part` file are not physically deleted mid-run. They are discarded at the final merge step: `real_events` copies only the **last** `desired(k)` entries from each `.part` file into the output tree (for `mixed_order=0`) or draws randomly from the last `desired(k)` entries per channel (for `mixed_order=1`, the default). Events written before the max-weight update are therefore silently dropped from the output.
+
+The limitation is that the test run must be long enough to find a reliable max weight for each channel. An underestimated max weight does not cause permanent bias — the overflow mechanism will self-correct — but it does waste CPU generating events that will ultimately be discarded.
 
 ### M-H method: no test run, adaptive
 
