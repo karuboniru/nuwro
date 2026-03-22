@@ -152,8 +152,21 @@ set(NUWRO_LINK_LIBS
 # Shared event library — loaded by ROOT macros (myroot, analysis scripts)
 add_library(event SHARED ${EVENT_SOURCES})
 add_dependencies(event params_header)
-target_include_directories(event PUBLIC ${NUWRO_INCLUDE_DIRS})
-target_link_libraries(event PUBLIC ${NUWRO_LINK_LIBS})
+# Use generator expressions so the exported target points to the installed
+# include/ directory rather than the build tree.
+target_include_directories(event
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+# ROOT headers/libs are PUBLIC because event1.h exposes ROOT types.
+# Pythia6 and the Fortran runtime are PRIVATE: they are already resolved
+# inside the shared library and consumers do not need to link them.
+target_link_libraries(event
+  PUBLIC  ${NUWRO_ROOT_LIBS}
+  PRIVATE Pythia6::Pythia6 Pythia6::EGPythia6 ${NUWRO_FORTRAN_RUNTIME}
+)
 
 # Static event library — linked into executables
 add_library(event1 STATIC ${EVENT_SOURCES})
@@ -305,7 +318,13 @@ install(TARGETS
 )
 
 install(TARGETS event
+  EXPORT  NuWroTargets
   LIBRARY DESTINATION lib
+)
+
+install(EXPORT NuWroTargets
+  NAMESPACE   NuWro::
+  DESTINATION lib/cmake/NuWro
 )
 
 # ROOT 6 PCM + rootmap files — needed for dictionary reflection and auto-load

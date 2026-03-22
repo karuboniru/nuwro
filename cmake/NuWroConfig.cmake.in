@@ -1,0 +1,12 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# NuWro::event exposes ROOT types in its public headers, so consumers need ROOT.
+find_dependency(ROOT 6 CONFIG
+  COMPONENTS Core RIO Tree Hist Physics MathCore EG Geom Minuit
+)
+
+include("${CMAKE_CURRENT_LIST_DIR}/NuWroTargets.cmake")
+
+check_required_components(NuWro)

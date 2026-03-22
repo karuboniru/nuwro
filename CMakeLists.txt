@@ -134,6 +134,37 @@ set(CMAKE_INSTALL_RPATH           "${CMAKE_INSTALL_PREFIX}/lib")
 add_subdirectory(src)
 
 # ---------------------------------------------------------------------------
+# CMake package config  (find_package(NuWro) support)
+# ---------------------------------------------------------------------------
+include(CMakePackageConfigHelpers)
+
+# git describe strings like "nuwro_19.02.1-3-gabcdef" are not valid CMake
+# version numbers; extract the first dotted-numeric prefix, or fall back.
+if(NUWRO_VERSION MATCHES "([0-9]+\\.[0-9]+(\\.[0-9]+)*)")
+  set(_nuwro_pkg_version "${CMAKE_MATCH_1}")
+else()
+  set(_nuwro_pkg_version "0.0.0")
+endif()
+
+configure_package_config_file(
+  "${CMAKE_SOURCE_DIR}/cmake/NuWroConfig.cmake.in"
+  "${CMAKE_BINARY_DIR}/NuWroConfig.cmake"
+  INSTALL_DESTINATION lib/cmake/NuWro
+)
+
+write_basic_package_version_file(
+  "${CMAKE_BINARY_DIR}/NuWroConfigVersion.cmake"
+  VERSION       ${_nuwro_pkg_version}
+  COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+    "${CMAKE_BINARY_DIR}/NuWroConfig.cmake"
+    "${CMAKE_BINARY_DIR}/NuWroConfigVersion.cmake"
+  DESTINATION lib/cmake/NuWro
+)
+
+# ---------------------------------------------------------------------------
 # Generate setup.sh using configure_file so variables are expanded at
 # configure time (not hardcoded paths at build time).
 # ---------------------------------------------------------------------------
