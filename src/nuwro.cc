@@ -111,6 +111,7 @@ void NuWro::prepare_mh(params &par)
 {
 	// Mirror the relevant steps of init() for the MH path,
 	// but write no auxiliary files and do not touch argc/argv.
+	shhpythiaitokay_(); // silence Pythia6 banner/warnings (normally called by main())
 	p = par;
 	p.use_mh = 1;
 	frandom_init(p.random_seed);
