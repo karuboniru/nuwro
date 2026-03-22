@@ -161,12 +161,10 @@ target_include_directories(event
     $<INSTALL_INTERFACE:include>
 )
 # ROOT headers/libs are PUBLIC because event1.h exposes ROOT types.
-# Pythia6 and the Fortran runtime are PRIVATE: they are already resolved
-# inside the shared library and consumers do not need to link them.
-target_link_libraries(event
-  PUBLIC  ${NUWRO_ROOT_LIBS}
-  PRIVATE Pythia6::Pythia6 Pythia6::EGPythia6 ${NUWRO_FORTRAN_RUNTIME}
-)
+# Pythia6 and the Fortran runtime are not used by the event library sources
+# (event1.cc, particle.cc, pdg.cc, dirs.cc, generatormt.cc, event1Dict.cxx)
+# so they are not linked here at all.
+target_link_libraries(event PUBLIC ${NUWRO_ROOT_LIBS})
 
 # Static event library — linked into executables
 add_library(event1 STATIC ${EVENT_SOURCES})
