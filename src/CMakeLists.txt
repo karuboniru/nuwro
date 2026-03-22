@@ -327,7 +327,7 @@ install(TARGETS event
 # Self-contained: all physics statics are linked privately so consumers only
 # need to link this one target (plus NuWro::event for ROOT I/O if needed).
 # ---------------------------------------------------------------------------
-add_library(nuwrogen SHARED libnuwro.cc)
+add_library(nuwrogen SHARED libnuwro.cc nuwro.cc)
 add_dependencies(nuwrogen params_header)
 target_include_directories(nuwrogen
   PUBLIC
