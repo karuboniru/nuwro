@@ -165,6 +165,7 @@ target_include_directories(event
 # (event1.cc, particle.cc, pdg.cc, dirs.cc, generatormt.cc, event1Dict.cxx)
 # so they are not linked here at all.
 target_link_libraries(event PUBLIC ${NUWRO_ROOT_LIBS})
+target_link_options(event PRIVATE $<$<PLATFORM_ID:Linux>:-Wl,--no-undefined>)
 
 # Static event library — linked into executables
 add_library(event1 STATIC ${EVENT_SOURCES})
