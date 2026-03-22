@@ -53,9 +53,9 @@ make bin/test_makehist
 1. Parse `params.txt` config
 2. Initialize detector geometry (`geomy`), beam, and nucleus target
 3. Select event generation mode:
-   - `real_events()` — standard weighted event generation
-   - `real_events_mh()` — Metropolis-Hastings unweighted generation (newer method)
-   - `user_events()` / `test_events()`
+   - `test_events()` + `real_events()` — standard two-phase unweighted generation: a test run estimates per-channel max weights and cross sections via `Chooser`; the real run uses rejection sampling against those max weights, producing unweighted events (all stored with `e->weight = total_xsec`)
+   - `real_events_mh()` — Metropolis-Hastings unweighted generation; skips the test run, learns channel cross sections adaptively during sampling
+   - `user_events()` — analysis mode
 
 For each event: choose interaction channel via `Chooser` (cross-section weighted), generate kinematics, apply FSI via `kaskada7.cc`.
 
@@ -98,4 +98,4 @@ Multiple MEC models are compiled in: `mecevent.cc` (model 1), `mecevent2.cc` (mo
 
 ### Metropolis-Hastings sampler
 
-`src/metropolis.h` provides a template-based M-H sampler. `src/generatormt.cc` is the underlying MT19937 RNG. `NuWro::real_events_mh()` in `nuwro.cc` uses this to produce unweighted events by sampling interaction channels proportional to their cross sections.
+`src/metropolis.h` provides a template-based M-H sampler. `src/generatormt.cc` is the underlying MT19937 RNG. `NuWro::real_events_mh()` in `nuwro.cc` uses this as an alternative to the standard rejection-sampling path: it learns channel cross sections adaptively and does not require a separate test run. See `metropolis-hastings.md` for details.
