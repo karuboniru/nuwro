@@ -37,6 +37,11 @@ class NuWro
 		void initialize_dynamics_list();
 		void real_events_mh(params &p);
 		event get_event();
+		// Library initialisation: full setup for MH generation without file I/O.
+		// Mirrors the relevant steps of init() but writes no aux files.
+		// data_dir must be set (via set_data_dir() or NUWRO env var) beforehand.
+		void prepare_mh(params &par);
+		const params &get_params() const { return p; }
 
 	private:
 		params p;

@@ -66,6 +66,13 @@ void set_dirs (char* exename)
 	   }
 }
 
+void set_data_dir(const string &dir)
+{
+	data_dir = dir;
+	if (!data_dir.empty() && data_dir.back() != '/')
+		data_dir += '/';
+}
+
 bool open_data_file(ifstream& incfile,string name)
 {
 		incfile.open(name.c_str());

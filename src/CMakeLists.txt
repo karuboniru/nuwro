@@ -321,6 +321,34 @@ install(TARGETS event
   LIBRARY DESTINATION lib
 )
 
+# ---------------------------------------------------------------------------
+# Generator library  (libnuwrogen.so)
+# Provides libnuwro::Generator — fluent MH-based event generation API.
+# Self-contained: all physics statics are linked privately so consumers only
+# need to link this one target (plus NuWro::event for ROOT I/O if needed).
+# ---------------------------------------------------------------------------
+add_library(nuwrogen SHARED libnuwro.cc)
+add_dependencies(nuwrogen params_header)
+target_include_directories(nuwrogen
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+# ROOT types appear in the public headers (event1.h, params.h) → PUBLIC.
+# All physics and Pythia6/Fortran are implementation details → PRIVATE.
+target_link_libraries(nuwrogen
+  PUBLIC  ${NUWRO_ROOT_LIBS}
+  PRIVATE event1 common1 mec1 dis1 espp1 sf1 hybrid1
+          Pythia6::Pythia6 Pythia6::EGPythia6 ${NUWRO_FORTRAN_RUNTIME}
+)
+target_link_options(nuwrogen PRIVATE $<$<PLATFORM_ID:Linux>:-Wl,--no-undefined>)
+
+install(TARGETS nuwrogen
+  EXPORT  NuWroTargets
+  LIBRARY DESTINATION lib
+)
+
 install(EXPORT NuWroTargets
   NAMESPACE   NuWro::
   DESTINATION lib/cmake/NuWro
@@ -345,6 +373,7 @@ install(FILES
     particle.h     generatormt.h
     jednostki.h    pdg.h           vect.h
     vecrand.h      event1.h
+    libnuwro.h
   DESTINATION include
 )
 install(FILES

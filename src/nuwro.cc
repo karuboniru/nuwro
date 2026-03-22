@@ -107,6 +107,33 @@ void NuWro::initialize_dynamics_list() {
 				k = 1. / enabled_dyns.size();
 }
 
+void NuWro::prepare_mh(params &par)
+{
+	// Mirror the relevant steps of init() for the MH path,
+	// but write no auxiliary files and do not touch argc/argv.
+	p = par;
+	p.use_mh = 1;
+	frandom_init(p.random_seed);
+
+	if (!p.kaskada_redo && (p.dyn_dis_nc || p.dyn_res_nc || p.dyn_dis_cc || p.dyn_res_cc))
+		singlepion(p);
+
+	_nucleus  = make_nucleus(p);
+	if (p.target_type == 1)
+		_mixer = new target_mixer(p);
+	else
+		_mixer = NULL;
+	_detector = make_detector(p);
+	_beam     = create_beam(p, _detector);
+
+	input.initialize(p);
+	input.load_data();
+	ff_configure(p);
+	refresh_dyn(p);
+	initialize_dynamics_list();
+	dismode = true;
+}
+
 void NuWro :: refresh_target (params &par)
 {
 	delete _nucleus;
