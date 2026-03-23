@@ -1080,22 +1080,34 @@ void NuWro::real_events_mh(params &p) {
   for (int i{}; i < p.number_of_events; i++) {
     *e = get_event();
     tf->Fill();
+    raport(i + 1, p.number_of_events, "events ready... ", 1000, -1, "", bool(a.progress));
   }
+  cout << "        100. % of events ready..." << endl;
   std::string xsec_log = a.output + ".xsec"s;
   std::ofstream xsec_file(xsec_log);
   double overall_xsec{};
-  for (size_t i = 0; i < enabled_dyns.size(); i++) {
-    if (channel_weight_sum[i]) {
-      std::stringstream ss{};
-      ss << "Channel " << enabled_dyns[i] << " weight avg: "
-         << channel_weight_sum[i] / channel_weight_sum_fraction[i] << '\n'
-         << " count: " << channel_count_final[enabled_dyns[i]] << '\n'
-         << '\n';
-      std::cout << ss.str();
-      xsec_file << ss.str();
+  for (size_t i = 0; i < enabled_dyns.size(); i++)
+    if (channel_weight_sum[i])
       overall_xsec += channel_weight_sum[i] / channel_weight_sum_fraction[i];
+
+  auto mh_short_report = [&](std::ostream &f, bool format) {
+    std::string tab(8, ' ');
+    std::string line(42, '-');
+    if (format) f << tab << " ";
+    f << "dyn     events        ratio   sigma[cm2]" << '\n';
+    for (size_t i = 0; i < enabled_dyns.size(); i++) {
+      double ch_xsec = channel_weight_sum[i]
+                           ? channel_weight_sum[i] / channel_weight_sum_fraction[i]
+                           : 0.;
+      if (format) f << tab << line << '\n' << tab << " ";
+      f << std::setw(3)  << enabled_dyns[i]                              << " "
+        << std::setw(10) << channel_count_final[enabled_dyns[i]]         << " "
+        << std::setw(12) << (overall_xsec ? ch_xsec / overall_xsec : 0) << " "
+        << std::setw(12) << ch_xsec                                      << '\n';
     }
-  }
+  };
+  mh_short_report(std::cout, true);
+  mh_short_report(xsec_file, false);
   {
     std::stringstream ss{};
     ss << "Overall acceptance: " << (double)accepted_count / p.number_of_events
