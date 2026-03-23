@@ -970,6 +970,7 @@ void NuWro::real_events(params& p)
 			unlink (filename);
 		}
 	}
+	tf->GetUserInfo()->Add(new TParameter<double>("xsec", _procesy.total()));
 	ff->Write ();
 	ff->Close ();
 	cout << "        100. % of real events copied..." << endl;
