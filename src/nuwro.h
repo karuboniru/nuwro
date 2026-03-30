@@ -11,6 +11,7 @@
 #include "chooser.h"
 #include "input_data.h"
 #include "metropolis.h"
+#include "timing_profiler.h"
 
 class NuWro
 {
@@ -60,6 +61,8 @@ class NuWro
 		std::unordered_map<int, double> channel_count_final{};
 		size_t accepted_count{};
 		bool accept{false};
+		// timing profiler
+		TimingProfiler timer_;
 };
 
 extern NuWro nuwro;
