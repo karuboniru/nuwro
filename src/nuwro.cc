@@ -573,7 +573,7 @@ void NuWro::finishevent(event* e, params &p)
 	}
 }								 //end of finishevent
 
-void NuWro::raport(double i, double n, const char* text, int precision, int k, string label, bool toFile)
+void NuWro::raport(double i, double n, const char* text, int precision, int k, string label, bool toFile, const string& suffix)
 {
   static int prev=-1;
   int proc=precision*i/n;
@@ -593,7 +593,10 @@ void NuWro::raport(double i, double n, const char* text, int precision, int k, s
       cerr << showpoint << proc*100.0/precision << " % of ";
       if(k>=0)
         cerr << label << " ";
-      cerr << text << '\r' << flush;
+      cerr << text;
+      if (!suffix.empty())
+        cerr << "  " << suffix;
+      cerr << '\r' << flush;
     }
     cerr.precision();
   }
@@ -1062,6 +1065,10 @@ void NuWro::real_events_mh(params &p) {
 
   frame_top("Run real events");
 
+  if (p.mh_target_unique_event_rate == 1.0)
+    std::cerr << "Warning: mh_target_unique_event_rate = 1.0 is unreachable; "
+                 "the chain cannot accept every step.\n";
+
   // std::unique_ptr<event> u_e();
   // event *e = new event;
   auto e = std::make_unique<event>();
@@ -1077,10 +1084,32 @@ void NuWro::real_events_mh(params &p) {
   // std::vector<size_t> channel_count_final{};
   // channel_count_final.resize(enabled_dyns.size());
   // int accepted_count{};
+  size_t accepted_count_window{};
+  double last_uer{};
   for (int i{}; i < p.number_of_events; i++) {
     *e = get_event();
     tf->Fill();
-    raport(i + 1, p.number_of_events, "events ready... ", 1000, -1, "", bool(a.progress));
+    if ((i + 1) % 1000 == 0) {
+      last_uer = (double)(accepted_count - accepted_count_window) / 1000.0;
+      accepted_count_window = accepted_count;
+      if (p.mh_target_unique_event_rate > 0.0) {
+        double goal = p.mh_target_unique_event_rate;
+        double tolerance = std::max((1.0 - last_uer) / 2.0, 0.5e-2);
+        if (last_uer < goal - tolerance)
+          p.mh_sample_interval += 10;
+        else if (last_uer > goal + tolerance)
+          p.mh_sample_interval = std::max(1, p.mh_sample_interval - 4);
+      }
+    }
+    std::string suffix;
+    if (p.mh_target_unique_event_rate > 0.0) {
+      suffix = "[interval=" + std::to_string(p.mh_sample_interval) + "]";
+    } else {
+      std::ostringstream oss;
+      oss << std::fixed << std::setprecision(3) << "[UER=" << last_uer << "]";
+      suffix = oss.str();
+    }
+    raport(i + 1, p.number_of_events, "events ready... ", 1000, -1, "", bool(a.progress), suffix);
   }
   cout << "        100. % of events ready..." << endl;
   std::string xsec_log = a.output + ".xsec"s;

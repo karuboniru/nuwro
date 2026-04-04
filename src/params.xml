@@ -646,6 +646,12 @@
   <param name="use_weighted_channel" type="checkbox" ctype="bool" default="1">
     <description>Use weighted transition prob</description>
   </param>
+  <param name="mh_target_unique_event_rate" type="checkbox" ctype="double" default="0">
+    <description>Target unique event rate for adaptive MH interval tuning.
+      0 = disabled (default). Range [0, 1); warns if set to exactly 1.
+      Every 1000 events, compares actual UER (accepted/generated) to this goal
+      and adjusts mh_sample_interval (+10 if too low, -4 if sufficiently above).</description>
+  </param>
 </params>
 
 <!--

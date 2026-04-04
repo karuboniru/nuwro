@@ -149,4 +149,5 @@ PARAM(string,kaskada_events_file,"")\
 PARAM(bool,use_mh,0)\
 PARAM(int,mh_sample_interval,80)\
 PARAM(bool,use_weighted_channel,1)\
+PARAM(double,mh_target_unique_event_rate,0)\
 
