@@ -98,4 +98,4 @@ Multiple MEC models are compiled in: `mecevent.cc` (model 1), `mecevent2.cc` (mo
 
 ### Metropolis-Hastings sampler
 
-`src/metropolis.h` provides a template-based M-H sampler. `src/generatormt.cc` is the underlying MT19937 RNG. `NuWro::real_events_mh()` in `nuwro.cc` uses this as an alternative to the standard rejection-sampling path: it learns channel cross sections adaptively and does not require a separate test run. See `metropolis-hastings.md` for details.
+`src/metropolis.h` provides a template-based M-H sampler. `src/generatormt.cc` is the underlying MT19937 RNG. `NuWro::real_events_mh()` in `nuwro.cc` uses this as an alternative to the standard rejection-sampling path: it learns channel cross sections adaptively and does not require a separate test run. The M-H accept/reject step calls `frandom()` from `generatormt.h`, sharing the same global MT19937 state as the rest of NuWro — so M-H runs are fully reproducible with a fixed `random_seed`. See `metropolis-hastings.md` for details.

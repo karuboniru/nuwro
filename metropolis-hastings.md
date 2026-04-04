@@ -45,7 +45,7 @@ A generic M-H sampler templated on the state type `T` and extra discriminator ar
 ```
 given proposed state x' with weight w(x', i'):
   ratio = w(x', i') / w(x_current, i_current)
-  if ratio > 1 or ratio > Uniform(0,1):
+  if ratio > 1 or ratio > frandom():   // frandom() = NuWro's shared global MT19937
       accept: replace current state with x'
   else:
       reject: discard x', keep current state
@@ -189,4 +189,4 @@ This is correct for unweighted M-H output where every event represents the same 
 - **Starting state**: the sampler's `current_weight` initializes to zero, so the first proposal is always accepted regardless of its weight.
 - **NaN guard**: events with NaN weight or bias are silently retried (the step counter `j` is decremented), preventing the chain from getting stuck on pathological phase-space points.
 - **Autocorrelation and thinning**: `mh_sample_interval` is a thinning interval — the chain advances that many proposal steps between consecutive output events, discarding the intermediate states. This reduces autocorrelation between stored events (successive output events are less likely to be identical). It is not a burn-in: there is no explicit warm-up phase. The chain starts cold (initial equal-probability channel weights, `current_weight = 0`), so the very first output events may reflect transient bias before the adaptive weights have converged. For precision studies, discarding the first O(100) output events is advisable.
-- **Reproducibility**: the `Metropolis` sampler seeds its `mt19937` from `std::random_device`, independently of the NuWro `frandom` seed set by `random_seed` in `params.txt`. M-H runs are therefore not reproducible across invocations even with a fixed seed.
+- **Reproducibility**: the `Metropolis` sampler calls `frandom()` from `generatormt.h`, sharing the same global MT19937 state as the rest of NuWro. M-H runs are therefore fully reproducible when `random_seed` is set to a fixed non-zero value in `params.txt`, identical to the standard rejection-sampling path.

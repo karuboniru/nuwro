@@ -644,6 +644,8 @@ void NuWro::pot_report(ostream& o, bool format=false)
 //////////////////////////////////////////////////////////////
 void NuWro::test_events(params & p)
 {
+	timer_.end_preparation();
+	timer_.init_test_run();
 	frame_top("Run test events");
 
 	if(p.number_of_test_events>0  && p.beam_test_only==0)
@@ -766,6 +768,7 @@ void NuWro::test_events(params & p)
 			pot_report(potinfo);
 		}
 	}
+	timer_.end_test_run();
 }
 
 
@@ -838,6 +841,7 @@ void NuWro::real_events(params& p)
   	frame_bottom();
 
 	frame_top("Run real events");
+	timer_.init_real_run(_procesy.size());
 
 	event *e = new event;
 
@@ -876,6 +880,7 @@ void NuWro::real_events(params& p)
 				t1->Branch ("e", "event", &e);
 				delete e;
 
+				timer_.start_channel(k);
 				while(_procesy.ready(k)<_procesy.desired(k))
 				{
 					e = new event ();
@@ -899,6 +904,7 @@ void NuWro::real_events(params& p)
 
 					raport(_procesy.ready(k),_procesy.desired(k),"events ready... ",1000,_procesy.dyn(k),_procesy.label(k),bool(a.progress));
 				}
+				timer_.end_channel(k);
 				f1->Write ();
 
         cout << "        100. % of " << _procesy.label(k) << " events ready..." << endl;
@@ -907,6 +913,7 @@ void NuWro::real_events(params& p)
 		// by copying only last desired[k] events to outfile
 				if(p.mixed_order==0)
 				{
+					timer_.init_copy_events();
 					int nn = t1->GetEntries ();
 					int start = nn-_procesy.desired(k);
 					for (int jj = start; jj < nn; jj++)
@@ -917,6 +924,7 @@ void NuWro::real_events(params& p)
 						delete e;
 						raport(jj-start+1,nn-start,"events copied... ",100,_procesy.dyn(k),_procesy.label(k),bool(a.progress));
 					}
+					timer_.end_copy_events();
 				}
 
 				f1->Close ();
@@ -929,6 +937,7 @@ void NuWro::real_events(params& p)
 	//////////////////////////////////////////////////////////////////////////////////////
 	if(p.mixed_order)
 	{
+		timer_.init_copy_events();
 		TFile *f[_procesy.size()];
 		TTree *t[_procesy.size()];
 		int n[_procesy.size()],u[_procesy.size()];
@@ -972,6 +981,7 @@ void NuWro::real_events(params& p)
 			sprintf(filename,"%s.%d.part",a.output,k);
 			unlink (filename);
 		}
+		timer_.end_copy_events();
 	}
 	tf->GetUserInfo()->Add(new TParameter<double>("xsec", _procesy.total()));
 	ff->Write ();
@@ -985,6 +995,8 @@ void NuWro::real_events(params& p)
 	{   ofstream  potinfo("POTinfo.txt");
 		pot_report(potinfo);
 	}
+
+	timer_.end_real_run();
 
 	frame_top("Finalize the simulation");
 	cout << "     " << "-> Generated the output file: \"" << output << "\"" << endl;
@@ -1060,6 +1072,9 @@ void NuWro::real_events_mh(params &p) {
   dismode = true;
   if (p.number_of_events < 1)
     return;
+
+  timer_.end_preparation();
+  timer_.init_mh();
 
   frame_bottom();
 
@@ -1151,6 +1166,7 @@ void NuWro::real_events_mh(params &p) {
   ff->Write();
   ff->Close();
   delete ff;
+  timer_.end_mh();
   frame_top("Finalize the simulation");
   cout << "        "
        << "-> Generated the output file: \"" << output << "\"" << endl;
@@ -1204,6 +1220,7 @@ void NuWro::kaskada_redo(string input,string output)
 void NuWro::main (int argc, char **argv)
 {
   shhpythiaitokay_();
+	timer_.init_process();
 	try
 	{
 		init(argc,argv);
@@ -1225,6 +1242,8 @@ void NuWro::main (int argc, char **argv)
 			}
 		}
 		genrand_write_state();
+		timer_.end_process();
+		timer_.print_report(cout, p.use_mh, &_procesy);
 	}
 	catch(string s)
 	{
