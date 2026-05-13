@@ -678,8 +678,10 @@ void NuWro::test_events(params & p)
 			e->dyn = _procesy.dyn(k); // choose dynamics
 			if(_mixer)
 				_mixer->prepare(p);
-			makeevent(e,p);
-			double bias=1;
+		makeevent(e,p);
+		if (e->weight > 0 && e->weight > _procesy.max_weight(k))
+			_procesy.save_max_event(k, *e);
+		double bias=1;
 			if(dismode && e->dyn>1 && e->dyn<6)
 				bias=e->in[0].t;
 
@@ -735,8 +737,9 @@ void NuWro::test_events(params & p)
 
     cout << "        100. % of test events ready..." << endl;
 
-		_procesy.report();
-		_procesy.set_weights_to_avg ();
+	_procesy.report();
+	_procesy.print_max_events(cout);
+	_procesy.set_weights_to_avg ();
 		string prefix;
 //		if(strlen(a.output)>5 && string(".root")==a.output[strlen(a.output)-5])
 			prefix="";

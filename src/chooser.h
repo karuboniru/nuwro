@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "params.h"
+#include "event1.h"
 
 using namespace std;
 
@@ -24,6 +25,8 @@ public:
     int dyn;        ///< code for the dynamics
     string label;   ///< label for the dynamics
 
+    event* max_event; ///< snapshot of the event with maximum weight
+
     Dyn(int dyn0, string label0="",bool active0=true)
     {
         dyn = dyn0;
@@ -31,7 +34,10 @@ public:
         active = active0;
         W = active;
         Sw = Sxw = Sxxw = Mxw = Desired = Ready = n = 0;
+        max_event = nullptr;
     }
+
+    ~Dyn() { delete max_event; }
 
     void add(double x,double bias=1)
     {
@@ -46,6 +52,14 @@ public:
         Sxw += xw;
         Sxxw += x * xw;
     }
+
+    void save_max_event(const event& src)
+    {
+        delete max_event;
+        max_event = new event(src);
+    }
+
+    bool has_max_event() const { return max_event != nullptr; }
     
 	double avg (){ return Sw==0 ? 0 : Sxw/Sw;}
 
@@ -84,6 +98,10 @@ class chooser
     double var (int i) {return proc[i].var();} ///< variance 
     double sigma (int i){return proc[i].sigma();} ///< sigma
     double efficiency(int i) {return proc[i].efficiency();} /// efficincy of i-th channel
+    double max_weight(int i) const { return proc[i].Mxw; }  ///< current max weight for i-th channel
+    void save_max_event(int i, const event& e) { proc[i].save_max_event(e); } ///< save snapshot of max-weight event
+    bool has_max_event(int i) const { return proc[i].has_max_event(); }
+    void print_max_events(ostream& out) const; ///< print kinematics of max-weight events for all channels
     void report();                  ///< report active channels characteristics
     void short_report(ostream &f, bool format);	///< write calculated total cross sections for each channel to file 
     void calculate_counts(int ilosc); ///< calculate how many events to generate for each channel
@@ -269,6 +287,63 @@ inline void chooser::calculate_counts(int Total)
         total-=frac;
     }
     proc[N-1].Desired=Total;
+}
+
+////////////////////////////////////////////////////////////////////////
+inline void chooser::print_max_events(ostream& out) const
+{
+    bool any = false;
+    for (int i = 0; i < N; i++)
+        if (has_max_event(i)) { any = true; break; }
+    if (!any) return;
+
+    string linia(60, '=');
+    out << "\n " << linia << "\n";
+    out << "  Max-weight event kinematics\n";
+    out << " " << linia << "\n";
+
+    for (int i = 0; i < N; i++)
+    {
+        if (!has_max_event(i)) continue;
+        event& e = *proc[i].max_event;
+        
+        out << "\n  Channel " << proc[i].label << " (dyn=" << proc[i].dyn << ")"
+            << "  max weight = " << scientific << setprecision(5) << e.weight << " cm2\n";
+        out << "  " << string(54, '-') << "\n";
+        
+        out << "  incoming:  pdg=" << setw(4) << e.in[0].pdg
+            << "  E=" << setw(10) << fixed << setprecision(4) << e.in[0].E()/GeV << " GeV";
+        if (e.in.size() > 1)
+            out << "  target: pdg=" << setw(4) << e.in[1].pdg
+                << "  p=" << setw(8) << setprecision(4) << e.in[1].momentum()/GeV << " GeV/c"
+                << "  E_bind=" << setw(8) << setprecision(2) << (e.in[1].mass() - e.in[1].t)/MeV << " MeV";
+        out << "\n";
+        
+        out << "  kinematics: Q2=" << setw(10) << setprecision(4) << -e.q2()/GeV2 << " GeV2"
+            << "  q0=" << setw(10) << e.q0()/GeV << " GeV"
+            << "  |q|=" << setw(10) << e.qv()/GeV << " GeV";
+        double Wval = e.s() > 0 ? sqrt(e.s()) : 0;
+        out << "  W=" << setw(10) << Wval/GeV << " GeV\n";
+        
+        out << "  outgoing (" << e.out.size() << " particles):\n";
+        for (size_t j = 0; j < e.out.size(); j++)
+        {
+            out << "    [" << j << "] pdg=" << setw(5) << e.out[j].pdg
+                << "  E=" << setw(10) << e.out[j].E()/GeV << " GeV"
+                << "  T=" << setw(10) << e.out[j].Ek()/GeV << " GeV"
+                << "  p=" << setw(10) << e.out[j].momentum()/GeV << " GeV/c";
+            if (j == 0 && e.in.size() > 0)
+                out << "  cos(theta)=" << setw(7) << setprecision(4) << e.costheta();
+            out << "\n";
+        }
+        
+        out << "  flags: CC=" << (e.flag.cc ? "yes" : "no")
+            << "  NC=" << (e.flag.nc ? "yes" : "no")
+            << "  SRC=" << (e.flag.isCorrelated ? "yes" : "no")
+            << "  transparent=" << (e.flag.isTransparent ? "yes" : "no")
+            << "\n";
+    }
+    out << "\n " << linia << "\n" << endl;
 }
 
 #endif
