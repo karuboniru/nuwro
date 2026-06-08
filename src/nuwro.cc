@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <vector>
@@ -1021,8 +1022,8 @@ event NuWro::get_event() {
       channel_sampleing_weight[i] =
           (channel_weight_sum[i] / channel_weight_sum_fraction[i]);
       if (channel_sampleing_weight[i] == 0 ||
-          isnan(channel_sampleing_weight[i]) ||
-          isinf(channel_sampleing_weight[i])) {  // invaild weights
+          std::isnan(channel_sampleing_weight[i]) ||
+          std::isinf(channel_sampleing_weight[i])) {  // invaild weights
         zero_exists = true;
         break;
       }
@@ -1051,7 +1052,8 @@ event NuWro::get_event() {
     makeevent(e, p);
     auto thisbias = 1 / e->in[0].t;
     auto biased_weight = e->weight * thisbias;
-    if (isnan(thisbias) || isnan(biased_weight)) { // ignore NaNs
+    if (std::isnan(thisbias) || std::isnan(biased_weight)) { // ignore NaNs
+      delete e;
       j--;
       continue;
     }

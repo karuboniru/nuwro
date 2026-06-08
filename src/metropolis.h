@@ -17,13 +17,18 @@ public:
   bool update_state(T *new_state, Args... args) {
     std::unique_ptr<T> candidate(new_state);
     double new_weight = get_weight(new_state, args...);
+    if (current_state == nullptr) {
+      current_state = std::move(candidate);
+      current_weight = new_weight;
+      return true;
+    }
     double ratio = new_weight / current_weight;
     if (ratio > 1.0 || ratio > frandom()) {
       current_state = std::move(candidate);
       current_weight = new_weight;
-      return true; // accept
+      return true;
     }
-    return false; // reject
+    return false;
   }
 
   const T &get_state() const { return *current_state; }
