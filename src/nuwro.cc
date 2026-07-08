@@ -1043,6 +1043,14 @@ event NuWro::get_event() {
 
   // std::uniform_real_distribution<> dis(0, 1);
   // std::uniform_int_distribution<> dis2(0, enabled_dyns.size() - 1);
+  // snapshot pre-update channel state
+  auto saved_dyn = enabled_dyns;
+  std::vector<double> saved_xsec(enabled_dyns.size());
+  std::vector<double> saved_prob = channel_sampleing_weight;
+  for (size_t i = 0; i < enabled_dyns.size(); i++)
+    saved_xsec[i] = channel_weight_sum_fraction[i]
+                    ? channel_weight_sum[i] / channel_weight_sum_fraction[i]
+                    : 0.;
   bool accepted = false;
   for (int j{}; j < p.mh_sample_interval; j++) {
     auto e = new event();
@@ -1066,6 +1074,9 @@ event NuWro::get_event() {
   accepted_count += accepted;
   e = sampler.get_state();
   channel_count_final[e.dyn]++;
+  e.mh_channel_dyn  = std::move(saved_dyn);
+  e.mh_channel_xsec = std::move(saved_xsec);
+  e.mh_channel_prob = std::move(saved_prob);
   finishevent(&e, p);
   return e;
 }

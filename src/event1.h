@@ -93,6 +93,10 @@ class event:public TObject
 		particle res_nu;     ///< store neutrino for reweighting
 		vect res_q;          ///< store q for reweighting
 
+		std::vector<int>    mh_channel_dyn;   ///< dyn values per index (same for all events, stored for self-contained analysis)
+		std::vector<double> mh_channel_xsec;  ///< pre-update estimated xsec per channel in MH mode [cm²]
+		std::vector<double> mh_channel_prob;  ///< pre-update proposal probability per channel in MH mode
+
 		event ():weight(0),norm(1){}///< default constructor
 		inline void check();        ///< stop program if event weight or momentum of any particle is NaN (not a number)
 		inline void clear_fsi();    ///< clear the fsi intermediate particles tracks
@@ -164,7 +168,7 @@ class event:public TObject
 		inline vect particle_max_mom_withincosine (int pdg, bool fsi, double kosinus);
 		inline vect particle_max_mom_withincosine_withinmomentum (int pdg, bool fsi, double kosinus, double threshold_min, double threshold_max);
 		inline double total_hadr_post();
-		ClassDef (event, 1);
+		ClassDef (event, 2);
 };
 
 /// add particle to a list and set its id to position in the list.
